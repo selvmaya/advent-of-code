@@ -1,0 +1,3 @@
+[submodule "aoc2022/inputs"]
+	path = aoc2022/inputs
+	url = https://github.com/selvmaya/aoc-2022-inputs
