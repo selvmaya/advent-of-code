@@ -1,7 +1,5 @@
-use std::env;
 use std::fs::File;
 use std::io::Read;
-use std::path::Path;
 
 struct FoodItem {
     calories: u32
@@ -23,7 +21,7 @@ impl Elf {
             food_items
         }
     }
-    fn total_food_calories(&self) -> u32 {
+    fn total_calories(&self) -> u32 {
         let mut total: u32 = 0;
         for food_item in self.food_items.as_slice() {
             total += food_item.calories;
@@ -32,11 +30,9 @@ impl Elf {
     }
 }
 
-const PATH: &str = "src/day_1.txt";
+const PATH: &str = "inputs/day_1.txt";
 
 pub fn run() {
-    let path: &Path = Path::new(PATH);
-    println!("Trying to read path: {}, absolute: {}, in directory: {}", path.display(), path.is_absolute(), env::current_dir().expect("No directory?").display());
     let mut file = File::open(PATH).unwrap();
     let mut file_content = String::new();
     file.read_to_string(&mut file_content).unwrap();
@@ -56,12 +52,14 @@ pub fn run() {
         }
     }
 
-    let mut elf_with_most_food = &elves[0];
-    for elf in &elves {
-        if elf.total_food_calories() >= elf_with_most_food.total_food_calories() {
-            elf_with_most_food = &elf;
-        }
-    }
+    elves.sort_by(|a, b| b.total_calories().cmp(&a.total_calories()));
+    let sorted_elves = elves;
 
-    println!("Elf with most calories has {}", elf_with_most_food.total_food_calories())
+    println!("Elf with the most calories has {} calories.", sorted_elves[0].total_calories());
+    println!("Elf with second most calories has {} calories.", sorted_elves[1].total_calories());
+    println!("Elf with third most calories has {} calories.", sorted_elves[2].total_calories());
+
+    let top_calories: Vec<u32> = sorted_elves[..=2].into_iter().map(|e| e.total_calories()).collect();
+    let total: u32 = top_calories.iter().sum();
+    println!("Calories of top three elves: {}", total)
 }
