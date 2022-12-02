@@ -34,23 +34,29 @@ const PATH: &str = "inputs/day_1.txt";
 
 pub fn run() {
     let mut file = File::open(PATH).unwrap();
-    let mut file_content = String::new();
-    file.read_to_string(&mut file_content).unwrap();
+    let mut raw_content = String::new();
+    file.read_to_string(&mut raw_content).unwrap();
 
-    let lines = file_content.lines();
+    // let elf_data = raw_content.split("\n\n");
 
-    let mut elves: Vec<Elf> = vec![];
-    let mut current_food_collection: Vec<FoodItem> = vec![];
-    for line in lines {
-        if line.is_empty() {
-            elves.push(Elf::from(current_food_collection));
-            current_food_collection = vec![];
-        }
-        else {
-            let calories:u32 = line.parse().expect("Line could not be parsed into int?");
-            current_food_collection.push(FoodItem::from(calories));
-        }
-    }
+
+    let mut elves: Vec<Elf> = Vec::new();
+
+
+
+    // let lines = file_content.lines();
+    // let mut elves: Vec<Elf> = vec![];
+    // let mut current_food_collection: Vec<FoodItem> = vec![];
+    // for line in lines {
+    //     if line.is_empty() {
+    //         elves.push(Elf::from(current_food_collection));
+    //         current_food_collection = vec![];
+    //     }
+    //     else {
+    //         let calories:u32 = line.parse().expect("Line could not be parsed into int?");
+    //         current_food_collection.push(FoodItem::from(calories));
+    //     }
+    // }
 
     elves.sort_by(|a, b| b.total_calories().cmp(&a.total_calories()));
     let sorted_elves = elves;
