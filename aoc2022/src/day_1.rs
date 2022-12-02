@@ -36,15 +36,6 @@ const PATH: &str = "inputs/day_1.txt";
 #[allow(unused)]
 pub fn run() {
     let raw_content = fs::read_to_string(PATH).unwrap();
-    // let mut elves = raw_content.split("\n\n")
-    //     .map(|elf_load| {
-    //         Elf::from_foods(elf_load
-    //             .lines()
-    //             .map(|item|
-    //                 FoodItem::from_calories(item.parse().unwrap())
-    //             ).collect::<Vec<FoodItem>>()
-    //         )
-    //     }).collect::<Vec<Elf>>();
 
     let mut elves= Vec::new();
     for elf_str in raw_content.split("\n\n") {
