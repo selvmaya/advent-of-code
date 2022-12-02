@@ -1,11 +1,10 @@
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 
 struct FoodItem {
     calories: u32
 }
 impl FoodItem {
-    fn from(calories: u32) -> Self {
+    fn from_calories(calories: u32) -> Self {
         FoodItem {
             calories
         }
@@ -16,11 +15,13 @@ struct Elf {
     food_items: Vec<FoodItem>
 }
 impl Elf {
-    fn from(food_items: Vec<FoodItem>) -> Self {
+    // calories
+    fn from_foods(foods: Vec<FoodItem>) -> Self {
         Elf {
-            food_items
+            food_items: foods
         }
     }
+
     fn total_calories(&self) -> u32 {
         let mut total: u32 = 0;
         for food_item in self.food_items.as_slice() {
@@ -32,29 +33,30 @@ impl Elf {
 
 const PATH: &str = "inputs/day_1.txt";
 
+#[allow(unused)]
 pub fn run() {
-    let mut file = File::open(PATH).unwrap();
-    let mut raw_content = String::new();
-    file.read_to_string(&mut raw_content).unwrap();
+    let raw_content = fs::read_to_string(PATH).unwrap();
+    // let mut elves = raw_content.split("\n\n")
+    //     .map(|elf_load| {
+    //         Elf::from_foods(elf_load
+    //             .lines()
+    //             .map(|item|
+    //                 FoodItem::from_calories(item.parse().unwrap())
+    //             ).collect::<Vec<FoodItem>>()
+    //         )
+    //     }).collect::<Vec<Elf>>();
 
-    // let elf_data = raw_content.split("\n\n");
-
-    let mut elves: Vec<Elf> = Vec::new();
-    let split_content: Vec<&str> = raw_content.split("\n").as_str();
-
-    // let lines = file_content.lines();
-    // let mut elves: Vec<Elf> = vec![];
-    // let mut current_food_collection: Vec<FoodItem> = vec![];
-    // for line in lines {
-    //     if line.is_empty() {
-    //         elves.push(Elf::from(current_food_collection));
-    //         current_food_collection = vec![];
-    //     }
-    //     else {
-    //         let calories:u32 = line.parse().expect("Line could not be parsed into int?");
-    //         current_food_collection.push(FoodItem::from(calories));
-    //     }
-    // }
+    let mut elves= Vec::new();
+    for elf_str in raw_content.split("\n\n") {
+        let mut foods = Vec::new();
+        for food_str in elf_str.lines() {
+            let food = food_str.parse::<u32>()
+                .expect(format!("Could not parse {} to u32!", food_str)
+                    .as_str());
+            foods.push(FoodItem::from_calories(food));
+        }
+        elves.push(Elf::from_foods(foods));
+    }
 
     elves.sort_by(|a, b| b.total_calories().cmp(&a.total_calories()));
     let sorted_elves = elves;
