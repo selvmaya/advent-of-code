@@ -39,10 +39,8 @@ pub fn run() {
 
     // let elf_data = raw_content.split("\n\n");
 
-
     let mut elves: Vec<Elf> = Vec::new();
-
-
+    let split_content: Vec<&str> = raw_content.split("\n").as_str();
 
     // let lines = file_content.lines();
     // let mut elves: Vec<Elf> = vec![];
