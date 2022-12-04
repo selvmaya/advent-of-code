@@ -1,4 +1,14 @@
-use std::fs;
+use crate::Runnable;
+
+pub struct Solution;
+impl Runnable for Solution {
+    fn run_with_input(&self, input: String) {
+        let str_rounds: Vec<&str> = input.lines().collect();
+
+        part_1(&str_rounds);
+        part_2(&str_rounds);
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -15,7 +25,6 @@ mod tests {
         assert_eq!(round_example_1, Round { opponent, player });
         assert_eq!(Ok(round_example_1), Round::from_str_part_1(full_str));
     }
-
     #[test]
     fn shape_generation_works_part_1() {
         let opponent_str = "A";
@@ -23,7 +32,6 @@ mod tests {
         let player_str = "Y";
         assert_eq!(Ok(Shape::Paper), Shape::from_player_str_xyz(player_str));
     }
-
     #[test]
     fn draw_outcomes_work() {
         for shape in vec![Shape::Rock, Shape::Paper, Shape::Scissors] {
@@ -42,7 +50,6 @@ mod tests {
             assert_eq!(Outcome::Loss, Outcome::from_fight(loser, winner));
         }
     }
-
     #[test]
     fn points_work() {
         let player = Shape::Paper;
@@ -51,7 +58,6 @@ mod tests {
         assert_eq!(6, outcome.points());
         assert_ne!(player.points(), outcome.points());
     }
-
     #[test]
     fn round_outcome_works() {
         let round: Round = Round {player: Shape::Rock, opponent: Shape::Scissors};
@@ -112,7 +118,7 @@ impl Outcome {
             "X" => Ok(Outcome::Loss),
             "Y" => Ok(Outcome::Draw),
             "Z" => Ok(Outcome::Win),
-            _ => Err(format!("{s} is not a valid type to convert from XYZ!"))
+            _ => Err(format!("{} is not a valid type to convert from XYZ!", s))
         }
     }
     fn points(&self) -> u32 {
@@ -130,7 +136,7 @@ impl Shape {
             "A" => Ok(Shape::Rock),
             "B" => Ok(Shape::Paper),
             "C" => Ok(Shape::Scissors),
-            _ => Err(format!("{s} is not a valid type to convert from ABC!"))
+            _ => Err(format!("{} is not a valid type to convert from ABC!", s))
         }
     }
     fn from_player_str_xyz(s: &str) -> Result<Self, String> {
@@ -138,7 +144,7 @@ impl Shape {
             "X" => Ok(Shape::Rock),
             "Y" => Ok(Shape::Paper),
             "Z" => Ok(Shape::Scissors),
-            _ => Err(format!("{s} is not a valid type to convert from XYZ!"))
+            _ => Err(format!("{} is not a valid type to convert from XYZ!", s))
         }
     }
     fn from_outcome_with_other(outcome: &Outcome, other: &Self) -> Self {
@@ -238,22 +244,18 @@ impl Round {
     }
 }
 
-const PATH: &str = "inputs/day_2.txt";
-
 #[allow(unused)]
-pub fn run() {
-    let raw_string: String = fs::read_to_string(PATH)
-        .expect(format!("Could not read file {PATH}").as_str());
-
-    let str_rounds: Vec<&str> = raw_string.lines().collect();
-
-    let rounds_part_1: Vec<Round> = str_rounds.iter()
-        .map(|r_s| Round::from_str_part_1(r_s).unwrap()).collect();
-    let points_part_1 = Round::player_total_points(&rounds_part_1);
-    println!("Total points after all rounds using rules from part 1: {points_part_1}");
-
+fn part_2(str_rounds: &Vec<&str>) {
     let rounds_part_2: Vec<Round> = str_rounds.iter()
         .map(|r_s| Round::from_str_part_2(r_s).unwrap()).collect();
     let points_part_2 = Round::player_total_points(&rounds_part_2);
-    println!("Total points after all rounds using rules from part 2: {points_part_2}");
+    println!("Total points after all rounds using rules from part 2: {}", points_part_2);
+}
+
+#[allow(unused)]
+fn part_1(str_rounds: &Vec<&str>) {
+    let rounds_part_1: Vec<Round> = str_rounds.iter()
+        .map(|r_s| Round::from_str_part_1(r_s).unwrap()).collect();
+    let points_part_1 = Round::player_total_points(&rounds_part_1);
+    println!("Total points after all rounds using rules from part 1: {}", points_part_1);
 }
