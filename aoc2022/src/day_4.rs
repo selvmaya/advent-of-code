@@ -20,13 +20,34 @@ mod tests {
 6-6,4-6
 2-6,4-8";
     #[test]
-    fn part_1_works() {
+    fn part_1_example_works() {
         assert_eq!(2, part_1_solve(TEST_INPUT));
     }
     #[test]
-    fn part_2_works() {
+    fn part_2_example_works() {
         assert_eq!(4, part_2_solve(TEST_INPUT));
     }
+
+    // cached comparison (refactoring confirmation)
+    // #[test]
+    // fn part_1_confirmed_result_comparison() {
+    //     let result_read = fs::read_to_string("outputs/day_4_part_2.txt");
+    //     match result_read {
+    //         Ok(r) => {
+    //             match r.parse::<u32>() {
+    //                 Ok(v) => {
+    //                     assert_eq!(v, part_1_solve(fs::read_to_string("inputs/day_4.txt").unwrap().as_str()))
+    //                 },
+    //                 Err(_) => {},
+    //             }
+    //         },
+    //         Err(_) => {}
+    //     }
+    // }
+    // #[test]
+    // fn part_2_confirmed_result_comparison() {
+    //
+    // }
 }
 
 // elves have been assigned the job of cleaning up sections of the camp

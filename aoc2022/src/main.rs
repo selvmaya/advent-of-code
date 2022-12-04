@@ -7,6 +7,32 @@ mod day_2;
 mod day_3;
 mod day_4;
 
+// macro_rules! day_tests {
+//     ($($name:ident: $type:ty)*) => {
+//         $(
+//             mod $name {
+//                 use super::*;
+//                 #[test]
+//                 fn test() {
+//                     let c = <$type>::new();
+//                     assert_eq!(c, c);
+//                     match fs::read_to_string(format!("outputs/_part_2.txt")) {
+//                         Ok(r) => {
+//                             match r.parse::<u32>() {
+//                                 Ok(v) => {
+//                                     assert_eq!(v, part_1_solve(fs::read_to_string("inputs/day_4.txt").unwrap().as_str()))
+//                                 },
+//                                 Err(_) => {},
+//                             }
+//                         },
+//                         Err(_) => {}
+//                     }
+//                 }
+//             }
+//         )*
+//     };
+// }
+
 trait Runnable {
     fn run_with_input(&self, input: String);
 }
@@ -27,7 +53,7 @@ impl Configuration {
 }
 
 fn main() {
-    let configurations: Vec<Configuration> = vec![
+    let configurations = [
         Configuration { runnable: Box::new(day_1::Solution), number: 1 },
         Configuration { runnable: Box::new(day_2::Solution), number: 2 },
         Configuration { runnable: Box::new(day_3::Solution), number: 3 },
