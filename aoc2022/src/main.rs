@@ -5,6 +5,7 @@ extern crate core;
 mod day_1;
 mod day_2;
 mod day_3;
+mod day_4;
 
 trait Runnable {
     fn run_with_input(&self, input: String);
@@ -29,7 +30,8 @@ fn main() {
     let configurations: Vec<Configuration> = vec![
         Configuration { runnable: Box::new(day_1::Solution), number: 1 },
         Configuration { runnable: Box::new(day_2::Solution), number: 2 },
-        Configuration { runnable: Box::new(day_3::Solution), number: 3 }
+        Configuration { runnable: Box::new(day_3::Solution), number: 3 },
+        Configuration { runnable: Box::new(day_4::Solution), number: 4 },
     ];
     let args: Vec<String> = env::args().collect();
     let selection_args: Vec<&str> = args[1..].into_iter().map(|s| s.as_str()).collect();
