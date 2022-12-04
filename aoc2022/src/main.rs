@@ -33,6 +33,7 @@ fn main() {
     ];
     let args: Vec<String> = env::args().collect();
     let selection_args: Vec<&str> = args[1..].into_iter().map(|s| s.as_str()).collect();
+
     if selection_args.is_empty() {
         // let selection_args = vec!["3"]; // debug runs specific configurations
         configurations.iter().for_each(|c| c.run()); // default runs everything
