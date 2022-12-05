@@ -59,12 +59,13 @@ struct Elf {
 
 impl Elf {
     fn from_range_str(range_str: &str) -> Result<Self, String> {
-        let str_range = match range_str.split_once("-") {
+        let str_range = match range_str.split_once("-")
+        {
             Some(s_r) => [s_r.0, s_r.1],
             None => return Err(format!("'{}' could not be split into ranges for an elf", range_str))
         };
         let int_r = str_range.iter()
-            .map(|r| r.parse().unwrap())
+            .map(|r| r.parse().expect(""))
             .collect::<Vec<u32>>();
         Ok(Elf {
             sections: int_r[0]..=int_r[1]

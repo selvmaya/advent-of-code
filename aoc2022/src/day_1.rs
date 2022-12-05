@@ -35,15 +35,16 @@ pub struct Solution;
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
         let mut elves= Vec::new();
-        for elf_str in input.split("\n\n") {
-            let mut foods = Vec::new();
-            for food_str in elf_str.lines() {
-                let food = food_str.parse::<u32>()
-                    .expect(format!("Could not parse {} to u32!", food_str)
-                        .as_str());
-                foods.push(FoodItem::from_calories(food));
+        let mut new_foods = Vec::new();
+        for line in input.lines() {
+            if line.is_empty() {
+                elves.push(Elf::from_foods(new_foods));
+                new_foods = Vec::new();
             }
-            elves.push(Elf::from_foods(foods));
+            else {
+                let calories = line.parse::<u32>().expect("Could not convert to int!");
+                new_foods.push(FoodItem::from_calories(calories))
+            }
         }
 
         elves.sort_by(|a, b| b.total_calories().cmp(&a.total_calories()));

@@ -1,3 +1,4 @@
+use std::mem::take;
 use crate::Runnable;
 
 pub struct Solution;
@@ -29,21 +30,80 @@ move 1 from 1 to 2";
 }
 
 // "expedition" can depart as soon as the final supplies have been unloaded from the ships.
-// supplies are stored in stacks of crates with a label (written as
+// supplies are stored in stacks of crates with a label (written with square brackets)
 // their starting position is our puzzle input
+// crates are labeled (in input) as upper case letters with label (char)
+#[derive(Clone)]
 struct Crate {
     label: char
 }
 // in the input the stacks have labels (numbers 1 and up) but it doesn't seem needed
+#[derive(Clone)]
 struct Stack {
-    crates: Vec<Crate>
+    crates: Vec<Crate> // stacked from bottom to top
 }
-// crates are labeled (in input) as upper case letters with label (char)
+impl Stack {
+    fn with_crate_on_top(&self, crate_to_add: Crate) -> Self {
+        let mut new_stack = self.clone();
+        new_stack.crates.push(crate_to_add);
+        new_stack
+    }
+    fn with_crates_on_top(&self, crates: Vec<Crate>) -> Self {
+        let mut new_stack = self.clone();
+        for crate_to_add in crates {
+            new_stack = new_stack.with_crate_on_top(crate_to_add);
+        }
+        new_stack
+    }
+    fn without_top_crate(&self) -> (Self, Crate) { // from top
+        let mut new_stack = self.clone();
+        let removed_crate = new_stack.crates.remove(new_stack.crates.len() - 1);
+        (new_stack, removed_crate)
+    }
+    fn without_crates_from_top(&self, amount: &u32) -> (Self, Vec<Crate>) {
+        let mut new_stack = self.clone();
+        let mut removed_crates: Vec<Crate> = Vec::new();
+        for _i in 0..*amount {
+            let crane_move_temp = new_stack.without_top_crate();
+            new_stack = crane_move_temp.0;
+            removed_crates.push(crane_move_temp.1);
+        }
+        (new_stack, removed_crates)
+    }
+}
 
 // the ship has a cargo crane that can move crates between stacks
-// the crane operator wil rearrange them in series of steps (bottom of puzzle input)
+#[derive(Clone)]
 struct Crane {
     stacks: Vec<Stack>
+}
+impl Crane {
+    fn from_str(drawing: &str) -> Self {
+        // find all crate labels,
+        // find their respective stack,
+        // then construct stack
+        let chars: Vec<char> = drawing.chars().collect();
+        let mut crates: Vec<Crate> = Vec::new();
+        // for char in chars {
+        //     if char
+        // }
+
+        todo!()
+    }
+}
+// the crane operator wil rearrange them in series of steps (bottom of puzzle input)
+struct Move {
+    crate_amount: u32,
+    stack_source: usize,
+    stack_target: usize,
+}
+impl Move {
+    fn from_str(line: &str) -> Self {
+        // get crate amount ("move x")
+        // get source stack index ("from y")
+        // get target stack index ("to z")
+        todo!()
+    }
 }
 
 // after the rearrangement, the correct crates will be at the top of each stack
@@ -54,20 +114,28 @@ impl Crane {
             .map(|s| s.crates.first().expect("No crates in stack?"))
             .map(|c| c.label).collect::<String>()
     }
+    fn after_move(self, new_move: &Move) -> Self {
+        let mut new_crane = self.clone();
+        let temp_crane_move = new_crane.stacks[new_move.stack_source]
+            .without_crates_from_top(&new_move.crate_amount);
+        new_crane.stacks[new_move.stack_source] = temp_crane_move.0;
+        new_crane.stacks[new_move.stack_target] = new_crane.stacks[0].with_crates_on_top(temp_crane_move.1);
+        new_crane
+    }
 }
 
 #[allow(unused)]
 fn part_1_solve(input: &str) -> String {
+    let parts = input.split_once("\r\n\r\n").unwrap(); // might only work on windows idk
+
     // construct crate layout (top of input)
-    let split_input = input.split_once("\n\n").expect("Could not split input!");
+    let mut crane = Crane::from_str(parts.0);
 
-    let stacks = vec![];
-    let crane = Crane {
-        stacks
-    };
+    // gather and perform moves
+    let moves: Vec<Move> = parts.1.lines().map(|line| Move::from_str(line)).collect();
+    for new_move in moves {
+        crane = crane.after_move(&new_move);
+    }
 
-    // move crates around (bottom of input)
-
-
-    crane.top_crate_labels()
+    crane.top_crate_labels() // return output
 }

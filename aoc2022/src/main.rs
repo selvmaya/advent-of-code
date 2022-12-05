@@ -45,6 +45,7 @@ impl Configuration {
     pub fn run(&self) {
         let input = self.get_input_from_number()
             .expect(format!("Could not find file for day {}", self.number).as_str());
+        println!("\n--- RUNNING DAY {} ---", self.number);
         self.runnable.run_with_input(input);
     }
     fn get_input_from_number(&self) -> std::io::Result<String> {
