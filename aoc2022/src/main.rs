@@ -6,6 +6,7 @@ mod day_1;
 mod day_2;
 mod day_3;
 mod day_4;
+mod day_5;
 
 // macro_rules! day_tests {
 //     ($($name:ident: $type:ty)*) => {
@@ -58,6 +59,7 @@ fn main() {
         Configuration { runnable: Box::new(day_2::Solution), number: 2 },
         Configuration { runnable: Box::new(day_3::Solution), number: 3 },
         Configuration { runnable: Box::new(day_4::Solution), number: 4 },
+        Configuration { runnable: Box::new(day_5::Solution), number: 5 },
     ];
     let args: Vec<String> = env::args().collect();
     let selection_args: Vec<&str> = args[1..].into_iter().map(|s| s.as_str()).collect();
