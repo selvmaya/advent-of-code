@@ -6,8 +6,7 @@ pub struct Solution;
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
         println!("Crates on top of each stack: {}", part_1_solve(&input));
-
-        todo!()
+        // println!("Crates on top of each stack: {}", part_2_solve(&input));
     }
 }
 
@@ -79,14 +78,13 @@ struct Crane {
 }
 impl Crane {
     fn from_str(drawing: &str) -> Self {
-        // find all crate labels,
-        // find their respective stack,
-        // then construct stack
-        let chars: Vec<char> = drawing.chars().collect();
-        let mut crates: Vec<Crate> = Vec::new();
-        // for char in chars {
-        //     if char
-        // }
+        let crate_lines = drawing.lines().filter(|line| line.contains("[")).collect::<Vec<&str>>();
+        let platform_line = drawing.lines().filter(|line| line.contains("1")).collect::<Vec<&str>>()[0];
+        let crates_2d: Vec<Vec<Crate>> = Vec::new();
+        for crate_line in crate_lines {
+            let crates_in_line: Vec<Crate> = Vec::new();
+
+        }
 
         todo!()
     }
