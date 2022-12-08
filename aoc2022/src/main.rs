@@ -1,6 +1,7 @@
 use std::{env, fs};
 
 extern crate core;
+extern crate core;
 
 mod day_1;
 mod day_2;

@@ -1,5 +1,7 @@
-use std::mem::take;
+use core::error::Source;
+use lazy_static::lazy_static;
 use crate::Runnable;
+use regex::*;
 
 pub struct Solution;
 
@@ -36,6 +38,23 @@ move 1 from 1 to 2";
 struct Crate {
     label: char
 }
+impl Crate {
+    fn from_str(input: &str) -> Option<Self> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"[A-Z]").unwrap();
+        }
+
+        return match input.contains(" ") {
+            true => None,
+            false => {
+                match RE.find(input) {
+                    None => None,
+                    Some(C) => Some(Crate { label: C.as_str().parse().unwrap() }),
+                }
+            }
+        }
+    }
+}
 // in the input the stacks have labels (numbers 1 and up) but it doesn't seem needed
 #[derive(Clone)]
 struct Stack {
@@ -54,20 +73,17 @@ impl Stack {
         }
         new_stack
     }
-    fn without_top_crate(&self) -> (Self, Crate) { // from top
+    fn remove_top_crate(self) -> Crate { // from top
         let mut new_stack = self.clone();
         let removed_crate = new_stack.crates.remove(new_stack.crates.len() - 1);
-        (new_stack, removed_crate)
+        removed_crate
     }
-    fn without_crates_from_top(&self, amount: &u32) -> (Self, Vec<Crate>) {
-        let mut new_stack = self.clone();
+    fn seperate_crates_from_top(self, amount: &u32) -> Vec<Crate> {
         let mut removed_crates: Vec<Crate> = Vec::new();
         for _i in 0..*amount {
-            let crane_move_temp = new_stack.without_top_crate();
-            new_stack = crane_move_temp.0;
-            removed_crates.push(crane_move_temp.1);
+            removed_crates.push(self.remove_top_crate());
         }
-        (new_stack, removed_crates)
+        removed_crates
     }
 }
 
@@ -78,12 +94,38 @@ struct Crane {
 }
 impl Crane {
     fn from_str(drawing: &str) -> Self {
-        let crate_lines = drawing.lines().filter(|line| line.contains("[")).collect::<Vec<&str>>();
-        let platform_line = drawing.lines().filter(|line| line.contains("1")).collect::<Vec<&str>>()[0];
+        lazy_static! {
+            static ref RE_NUMBER: Regex = Regex::new(r"[1-9]").unwrap();
+            static ref RE_CRATE: Regex = Regex::new(r"    |\[[A-Z]\]").unwrap(); // 4 spaces or crate str eg: "[X]"
+        }
 
+        // get platform numbers
+        let platform: &str = drawing.lines()
+            .filter(|line| line.contains("1")).collect::<Vec<&str>>()[0]; // just numbers
+        let numbers: Vec<u32> = RE_NUMBER.find_iter(platform)
+            .map(|m| m.as_str().parse().unwrap()).collect();
 
+        // get crates (and empty spaces)
+        let crates_lines: Vec<&str> = drawing.lines()
+            .filter(|line| line.contains("[")).collect(); // all lines with at least 1 crate
+        // in order to use indices at the end we need to include spaces as "empty" crates (Option::None)
+        let option_crates: Vec<Vec<Option<Crate>>> = crates_lines.iter()
+            .map(|line| RE_CRATE.find_iter(line)
+                .map(|m| Crate::from_str(m.as_str())).collect()).collect();
 
-        todo!()
+        // create stacks from crates and platform numbers
+        let mut stacks: Vec<Stack> = vec![Stack { crates: Vec::new() }; numbers.len()];
+        for mut option_crate_line in option_crates {
+            for i in 0..option_crate_line.len() {
+                let option_crate: Option<Crate> = option_crate_line.remove(i);
+                match option_crate {
+                    None => {}, // ignore empty spaces
+                    Some(c) => stacks[i].crates.push(c)
+                }
+            }
+        }
+
+        Crane { stacks }
     }
 }
 // the crane operator wil rearrange them in series of steps (bottom of puzzle input)
@@ -109,13 +151,16 @@ impl Crane {
             .map(|s| s.crates.first().expect("No crates in stack?"))
             .map(|c| c.label).collect::<String>()
     }
+    fn find_stack(self, number: &usize) -> Stack {
+        self.stacks[*number - 1] // offset index
+    }
     fn after_move(self, new_move: &Move) -> Self {
-        let mut new_crane = self.clone();
-        let temp_crane_move = new_crane.stacks[new_move.stack_source]
-            .without_crates_from_top(&new_move.crate_amount);
-        new_crane.stacks[new_move.stack_source] = temp_crane_move.0;
-        new_crane.stacks[new_move.stack_target] = new_crane.stacks[0].with_crates_on_top(temp_crane_move.1);
-        new_crane
+        let source_stack = self.find_stack(&new_move.stack_source);
+        let target_stack = self.find_stack(&new_move.stack_target);
+        let seperated_stack = source_stack.seperate_crates_from_top(&new_move.crate_amount);
+        new_crane.find_stack(&new_move.stack_source).crates = seperated_stack.1;
+        new_crane.stacks[new_move.stack_target] = new_crane.stacks[0].with_crates_on_top(seperated_stack.1);
+        self
     }
 }
 
