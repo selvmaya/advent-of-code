@@ -1,4 +1,3 @@
-use core::error::Source;
 use lazy_static::lazy_static;
 use crate::Runnable;
 use regex::*;
@@ -49,7 +48,7 @@ impl Crate {
             false => {
                 match RE.find(input) {
                     None => None,
-                    Some(C) => Some(Crate { label: C.as_str().parse().unwrap() }),
+                    Some(c) => Some(Crate { label: c.as_str().parse().unwrap() }),
                 }
             }
         }
@@ -66,24 +65,10 @@ impl Stack {
         new_stack.crates.push(crate_to_add);
         new_stack
     }
-    fn with_crates_on_top(&self, crates: Vec<Crate>) -> Self {
+    fn separate_crate_from_top(&self) -> (Self, Crate) { // from top
         let mut new_stack = self.clone();
-        for crate_to_add in crates {
-            new_stack = new_stack.with_crate_on_top(crate_to_add);
-        }
-        new_stack
-    }
-    fn remove_top_crate(self) -> Crate { // from top
-        let mut new_stack = self.clone();
-        let removed_crate = new_stack.crates.remove(new_stack.crates.len() - 1);
-        removed_crate
-    }
-    fn seperate_crates_from_top(self, amount: &u32) -> Vec<Crate> {
-        let mut removed_crates: Vec<Crate> = Vec::new();
-        for _i in 0..*amount {
-            removed_crates.push(self.remove_top_crate());
-        }
-        removed_crates
+        let removed_crate = new_stack.crates.remove(self.crates.len() - 1);
+        (new_stack, removed_crate)
     }
 }
 
@@ -116,7 +101,7 @@ impl Crane {
         // create stacks from crates and platform numbers
         let mut stacks: Vec<Stack> = vec![Stack { crates: Vec::new() }; numbers.len()];
         for mut option_crate_line in option_crates {
-            for i in 0..option_crate_line.len() {
+            for i in 0..option_crate_line.len() - 1 {
                 let option_crate: Option<Crate> = option_crate_line.remove(i);
                 match option_crate {
                     None => {}, // ignore empty spaces
@@ -131,15 +116,29 @@ impl Crane {
 // the crane operator wil rearrange them in series of steps (bottom of puzzle input)
 struct Move {
     crate_amount: u32,
-    stack_source: usize,
-    stack_target: usize,
+    source: usize,
+    target: usize,
 }
 impl Move {
     fn from_str(line: &str) -> Self {
-        // get crate amount ("move x")
-        // get source stack index ("from y")
-        // get target stack index ("to z")
-        todo!()
+        lazy_static! {
+            // get crate amount ("move x")
+            static ref CRATE_RE: Regex = Regex::new(r"move [1-99]").unwrap();
+            // get source stack index ("from y")
+            static ref SOURCE_RE: Regex = Regex::new(r"from [1-9]").unwrap();
+            // get target stack index ("to z")
+            static ref TARGET_RE: Regex = Regex::new(r"to [1-9]").unwrap();
+            // get actual index/number from string
+            static ref NUMBER_RE: Regex = Regex::new(r"[1-99]").unwrap();
+        }
+        let crate_str = CRATE_RE.find(line).unwrap().as_str();
+        let source_str = SOURCE_RE.find(line).unwrap().as_str();
+        let target_str = TARGET_RE.find(line).unwrap().as_str();
+        Move {
+            crate_amount: NUMBER_RE.find(crate_str).unwrap().as_str().parse().unwrap(),
+            source: NUMBER_RE.find(source_str).unwrap().as_str().parse().unwrap(),
+            target: NUMBER_RE.find(target_str).unwrap().as_str().parse().unwrap()
+        }
     }
 }
 
@@ -151,22 +150,31 @@ impl Crane {
             .map(|s| s.crates.first().expect("No crates in stack?"))
             .map(|c| c.label).collect::<String>()
     }
-    fn find_stack(self, number: &usize) -> Stack {
-        self.stacks[*number - 1] // offset index
-    }
-    fn after_move(self, new_move: &Move) -> Self {
-        let source_stack = self.find_stack(&new_move.stack_source);
-        let target_stack = self.find_stack(&new_move.stack_target);
-        let seperated_stack = source_stack.seperate_crates_from_top(&new_move.crate_amount);
-        new_crane.find_stack(&new_move.stack_source).crates = seperated_stack.1;
-        new_crane.stacks[new_move.stack_target] = new_crane.stacks[0].with_crates_on_top(seperated_stack.1);
-        self
+    // fn find_stack(&self, number: &usize) -> &Stack {
+    //     &self.stacks[*number - 1] // offset index
+    // }
+    fn after_move(&self, new_move: &Move) -> Crane {
+        let mut new_crane = self.clone();
+        let mut move_count = new_move.crate_amount;
+        if move_count >= self.stacks[new_move.source].crates.len() as u32 {
+            move_count = self.stacks[new_move.source].crates.len() as u32;
+        }
+        for _i in 0..move_count {
+            let temp = self.stacks[new_move.source].separate_crate_from_top();
+            new_crane.stacks[new_move.source] = temp.0;
+            new_crane.stacks[new_move.target] = self.stacks[new_move.target].with_crate_on_top(temp.1);
+        }
+        new_crane
     }
 }
 
 #[allow(unused)]
 fn part_1_solve(input: &str) -> String {
-    let parts = input.split_once("\r\n\r\n").unwrap(); // might only work on windows idk
+    println!("Input: {input}");
+    let parts = match input.split_once("\r\n\r\n") {
+        None => input.split_once("\n\n").unwrap(),
+        Some(p) => p
+    };
 
     // construct crate layout (top of input)
     let mut crane = Crane::from_str(parts.0);
