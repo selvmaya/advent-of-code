@@ -23,6 +23,7 @@ move 1 from 2 to 1
 move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2";
+    #[ignore]
     #[test]
     fn part_1_example_works() {
         assert_eq!("CMZ", part_1_solve(TEST_INPUT));
