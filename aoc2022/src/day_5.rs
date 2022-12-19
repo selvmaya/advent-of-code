@@ -44,14 +44,9 @@ impl Crate {
             static ref RE: Regex = Regex::new(r"[A-Z]").unwrap();
         }
 
-        return match input.contains(" ") {
+        return match input.contains(' ') {
             true => None,
-            false => {
-                match RE.find(input) {
-                    None => None,
-                    Some(c) => Some(Crate { label: c.as_str().parse().unwrap() }),
-                }
-            }
+            false => RE.find(input).map(|c| Crate { label: c.as_str().parse().unwrap() }),
         }
     }
 }
@@ -87,13 +82,13 @@ impl Crane {
 
         // get platform numbers
         let platform: &str = drawing.lines()
-            .filter(|line| line.contains("1")).collect::<Vec<&str>>()[0]; // just numbers
+            .filter(|line| line.contains('1')).collect::<Vec<&str>>()[0]; // just numbers
         let numbers: Vec<u32> = RE_NUMBER.find_iter(platform)
             .map(|m| m.as_str().parse().unwrap()).collect();
 
         // get crates (and empty spaces)
         let crates_lines: Vec<&str> = drawing.lines()
-            .filter(|line| line.contains("[")).collect(); // all lines with at least 1 crate
+            .filter(|line| line.contains('[')).collect(); // all lines with at least 1 crate
         // in order to use indices at the end we need to include spaces as "empty" crates (Option::None)
         let option_crates: Vec<Vec<Option<Crate>>> = crates_lines.iter()
             .map(|line| RE_CRATE.find_iter(line)
@@ -181,7 +176,7 @@ fn part_1_solve(input: &str) -> String {
     let mut crane = Crane::from_str(parts.0);
 
     // gather and perform moves
-    let moves: Vec<Move> = parts.1.lines().map(|line| Move::from_str(line)).collect();
+    let moves: Vec<Move> = parts.1.lines().map(Move::from_str).collect();
     for new_move in moves {
         crane = crane.after_move(&new_move);
     }
