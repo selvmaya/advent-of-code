@@ -70,11 +70,11 @@ impl Item {
     fn get_priority(&self) -> Result<u32, String> {
         let letter = self.letter_type;
         match ASCII_LOWER.iter().position(|&c| c == letter) {
-            Some(p) => return Ok(p as u32 + 1),
+            Some(p) => Ok(p as u32 + 1),
             None => {
                 let letter_as_lower = letter.to_ascii_lowercase();
                 match ASCII_LOWER.iter().position(|&c| c == letter_as_lower) {
-                    Some(p) => return Ok(p as u32 + 27),
+                    Some(p) => Ok(p as u32 + 27),
                     None => Err(format!("Could not find priority of letter '{}'", letter))
                 }
             }
@@ -85,12 +85,7 @@ impl Item {
 // find the item that appears in both compartments
 impl Rucksack {
     fn find_duplicate(&self) -> Option<&Item> {
-        for item in &self.compartments[0].items {
-            if self.compartments[1].items.contains(item) {
-                return Some(item);
-            }
-        }
-        None
+        self.compartments[0].items.iter().find(|&item| self.compartments[1].items.contains(item))
     }
 }
 
@@ -99,11 +94,11 @@ impl Rucksack {
 #[allow(unused)]
 fn part_1(input: &str) {
     let rucksacks: Vec<Rucksack> = input.lines()
-        .map(|r_s| Rucksack::from_str(r_s)).collect();
+        .map(Rucksack::from_str).collect();
 
     let priority_sum: u32 = rucksacks.iter()
         .map(|r| r.find_duplicate()
-            .expect(format!("Rucksack '{:?}' does not contain any duplicates", r).as_str()))
+            .unwrap_or_else(|| panic!("Rucksack '{:?}' does not contain any duplicates", r)))
         .map(|item| item.get_priority().unwrap())
         .sum();
 
@@ -139,7 +134,7 @@ impl Rucksack {
         let mut items: Vec<&Item> = Vec::new();
         for compartment in &self.compartments {
             for item in &compartment.items {
-                items.push(&item);
+                items.push(item);
             }
         }
         items
@@ -147,14 +142,7 @@ impl Rucksack {
 }
 impl Group {
     fn find_badge(&self) -> Option<&Item> {
-        for item in self.elves[0].rucksack.all_items() {
-            if self.elves[1].rucksack.contains(&item) {
-                if self.elves[2].rucksack.contains(&item) {
-                    return Some(&item);
-                }
-            }
-        }
-        None
+        self.elves[0].rucksack.all_items().into_iter().find(|&item| self.elves[1].rucksack.contains(item) && self.elves[2].rucksack.contains(item))
     }
 }
 
@@ -180,14 +168,14 @@ fn part_2(input: &str) {
             groups.push(
                 Group::from_str_rucksacks(
                     str_rucksacks[..].try_into()
-                        .expect(format!("Group starting with rucksack {} could not be converted to array", &str_rucksacks[0]).as_str())));
+                        .unwrap_or_else(|_| panic!("Group starting with rucksack {} could not be converted to array", &str_rucksacks[0]))));
             str_rucksacks = Vec::new();
         }
     }
 
     // find badges of all groups
     let badges: Vec<&Item> = groups.iter().map(|g| g.find_badge()
-        .expect(format!("Group '{:?}' did not have a common badge", g).as_str()))
+        .unwrap_or_else(|| panic!("Group '{:?}' did not have a common badge", g)))
         .collect();
 
     // display sum of "priorities" (values) for each badge

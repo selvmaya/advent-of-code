@@ -34,7 +34,7 @@ mod tests {
     }
     #[test]
     fn draw_outcomes_work() {
-        for shape in vec![Shape::Rock, Shape::Paper, Shape::Scissors] {
+        for shape in &[Shape::Rock, Shape::Paper, Shape::Scissors] {
             assert_eq!(Outcome::Draw, Outcome::from_fight(&shape, &shape));
         }
     }
@@ -154,7 +154,7 @@ impl Shape {
                 Shape::Paper => Shape::Rock,
                 Shape::Scissors => Shape::Paper
             },
-            Outcome::Draw => other.clone(),
+            Outcome::Draw => *other,
             Outcome::Win => match &other {
                 Shape::Rock => Shape::Paper,
                 Shape::Paper => Shape::Scissors,
@@ -228,7 +228,7 @@ impl Round {
         Ok(Round { player, opponent })
     }
     fn split_round_str(full_str: &str) -> Vec<&str> {
-        full_str.split(" ").collect()
+        full_str.split(' ').collect()
     }
 
     fn player_fight_outcome(&self) -> Outcome {

@@ -54,7 +54,7 @@ impl Runnable for Solution {
         println!("Elf with second most calories has {} calories.", sorted_elves[1].total_calories());
         println!("Elf with third most calories has {} calories.", sorted_elves[2].total_calories());
 
-        let top_calories: Vec<u32> = sorted_elves[..=2].into_iter().map(|e| e.total_calories()).collect();
+        let top_calories: Vec<u32> = sorted_elves[..=2].iter().map(|e| e.total_calories()).collect();
         let total: u32 = top_calories.iter().sum();
         println!("Calories of top three elves: {}", total)
     }

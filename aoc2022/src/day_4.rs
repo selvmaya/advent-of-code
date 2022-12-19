@@ -59,7 +59,7 @@ struct Elf {
 
 impl Elf {
     fn from_range_str(range_str: &str) -> Result<Self, String> {
-        let str_range = match range_str.split_once("-")
+        let str_range = match range_str.split_once('-')
         {
             Some(s_r) => [s_r.0, s_r.1],
             None => return Err(format!("'{}' could not be split into ranges for an elf", range_str))
@@ -83,12 +83,12 @@ struct Pair {
 // one elf pair per puzzle input line
 impl Pair {
     fn from_str_line(line: &str) -> Result<Self, String> {
-        let str_elves = match &line.split_once(",") {
+        let str_elves = match &line.split_once(',') {
             Some(s) => [s.0, s.1],
             None => return Err(format!("'{}' could not be split into two string literals", &line))
         };
         Ok(Pair {
-            elves: str_elves.map(|e_s| Elf::from_range_str(&e_s).unwrap())
+            elves: str_elves.map(|e_s| Elf::from_range_str(e_s).unwrap())
         })
     }
 }
@@ -97,8 +97,8 @@ impl Pair {
 // that fully covers the other (2-8 fully covers 3-7)
 impl Elf {
     fn fully_contains_other(&self, other: &Self) -> bool {
-        self.sections.contains(&other.sections.start())
-            && self.sections.contains(&other.sections.end())
+        self.sections.contains(other.sections.start())
+            && self.sections.contains(other.sections.end())
     }
 }
 impl Pair {

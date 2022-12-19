@@ -42,12 +42,12 @@ struct Configuration {
 impl Configuration {
     pub fn run(&self) {
         let input = self.get_input_from_number()
-            .expect(format!("Could not find file for day {}", self.number).as_str());
+            .unwrap_or_else(|_| panic!("Could not find file for day {}", self.number));
         println!("\n--- RUNNING DAY {} ---", self.number);
         self.runnable.run_with_input(input);
     }
     fn get_input_from_number(&self) -> std::io::Result<String> {
-        let path = format!("inputs/day_{}.txt", self.number.to_string());
+        let path = format!("inputs/day_{}.txt", self.number);
         fs::read_to_string(path)
     }
 }
@@ -61,7 +61,7 @@ fn main() {
         Configuration { runnable: Box::new(day_5::Solution), number: 5 },
     ];
     let args: Vec<String> = env::args().collect();
-    let selection_args: Vec<&str> = args[1..].into_iter().map(|s| s.as_str()).collect();
+    let selection_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
 
     if selection_args.is_empty() {
         // let selection_args = vec!["3"]; // debug runs specific configurations
