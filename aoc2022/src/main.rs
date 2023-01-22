@@ -1,11 +1,5 @@
 use std::{env, fs};
 
-mod day_1;
-mod day_2;
-mod day_3;
-mod day_4;
-mod day_5;
-
 // macro_rules! day_tests {
 //     ($($name:ident: $type:ty)*) => {
 //         $(
@@ -31,6 +25,12 @@ mod day_5;
 //         )*
 //     };
 // }
+
+mod day_1;
+mod day_2;
+mod day_3;
+mod day_4;
+mod day_5;
 
 trait Runnable {
     fn run_with_input(&self, input: String);
