@@ -13,13 +13,13 @@ impl Runnable for Solution {
 // rucksack has 2 large compartments
 #[derive(Debug)]
 struct Rucksack {
-    compartments: [Compartment; 2]
+    compartments: [Compartment; 2],
 }
 
 // all items go into exactly 1 of the 2 compartments
 #[derive(Debug)]
 struct Compartment {
-    items: Vec<Item>
+    items: Vec<Item>,
 }
 
 // the error is that one item per backpack is in the wrong compartment
@@ -29,9 +29,8 @@ struct Compartment {
 // each item "type" is identified by a single letter (upper or lower-case)
 #[derive(PartialEq, Debug)]
 struct Item {
-    letter_type: char
+    letter_type: char,
 }
-
 
 // input (list of items) are given as characters on a single line
 // each compartment has exactly the same amount of items,
@@ -43,15 +42,15 @@ impl Rucksack {
         Rucksack {
             compartments: [
                 Compartment::from_str(str_compartments.0),
-                Compartment::from_str(str_compartments.1)
-            ]
+                Compartment::from_str(str_compartments.1),
+            ],
         }
     }
 }
 impl Compartment {
     fn from_str(str_input: &str) -> Self {
         Compartment {
-            items: str_input.chars().map( | c| Item { letter_type: c }).collect()
+            items: str_input.chars().map(|c| Item { letter_type: c }).collect(),
         }
     }
 }
@@ -59,12 +58,8 @@ impl Compartment {
 // every item type can be converted to a "priority" (number)
 // priorities are 1-26 (lower case) and 27-52 (upper case)
 const ASCII_LOWER: [char; 26] = [
-    'a', 'b', 'c', 'd', 'e',
-    'f', 'g', 'h', 'i', 'j',
-    'k', 'l', 'm', 'n', 'o',
-    'p', 'q', 'r', 's', 't',
-    'u', 'v', 'w', 'x', 'y',
-    'z',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+    't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 impl Item {
     fn get_priority(&self) -> Result<u32, String> {
@@ -75,7 +70,7 @@ impl Item {
                 let letter_as_lower = letter.to_ascii_lowercase();
                 match ASCII_LOWER.iter().position(|&c| c == letter_as_lower) {
                     Some(p) => Ok(p as u32 + 27),
-                    None => Err(format!("Could not find priority of letter '{}'", letter))
+                    None => Err(format!("Could not find priority of letter '{}'", letter)),
                 }
             }
         }
@@ -85,7 +80,10 @@ impl Item {
 // find the item that appears in both compartments
 impl Rucksack {
     fn find_duplicate(&self) -> Option<&Item> {
-        self.compartments[0].items.iter().find(|&item| self.compartments[1].items.contains(item))
+        self.compartments[0]
+            .items
+            .iter()
+            .find(|&item| self.compartments[1].items.contains(item))
     }
 }
 
@@ -93,12 +91,14 @@ impl Rucksack {
 
 #[allow(unused)]
 fn part_1(input: &str) {
-    let rucksacks: Vec<Rucksack> = input.lines()
-        .map(Rucksack::from_str).collect();
+    let rucksacks: Vec<Rucksack> = input.lines().map(Rucksack::from_str).collect();
 
-    let priority_sum: u32 = rucksacks.iter()
-        .map(|r| r.find_duplicate()
-            .unwrap_or_else(|| panic!("Rucksack '{:?}' does not contain any duplicates", r)))
+    let priority_sum: u32 = rucksacks
+        .iter()
+        .map(|r| {
+            r.find_duplicate()
+                .unwrap_or_else(|| panic!("Rucksack '{:?}' does not contain any duplicates", r))
+        })
         .map(|item| item.get_priority().unwrap())
         .sum();
 
@@ -110,13 +110,13 @@ fn part_1(input: &str) {
 // elves are divided into groups of 3
 #[derive(Debug)]
 struct Group {
-    elves: [Elf; 3]
+    elves: [Elf; 3],
 }
 
 // each elf has 1 rucksack
 #[derive(Debug)]
 struct Elf {
-    rucksack: Rucksack
+    rucksack: Rucksack,
 }
 
 // each group has 1 "badge" that is an item with a specific letter, which we do not know
@@ -142,15 +142,23 @@ impl Rucksack {
 }
 impl Group {
     fn find_badge(&self) -> Option<&Item> {
-        self.elves[0].rucksack.all_items().into_iter().find(|&item| self.elves[1].rucksack.contains(item) && self.elves[2].rucksack.contains(item))
+        self.elves[0]
+            .rucksack
+            .all_items()
+            .into_iter()
+            .find(|&item| {
+                self.elves[1].rucksack.contains(item) && self.elves[2].rucksack.contains(item)
+            })
     }
 }
 
 // each three lines in input corresponds to a single group of 3 elves
 impl Group {
     fn from_str_rucksacks(str_rucksacks: [&str; 3]) -> Self {
-        Group { elves: str_rucksacks.map(|r_s|
-            Elf { rucksack: Rucksack::from_str(r_s) })
+        Group {
+            elves: str_rucksacks.map(|r_s| Elf {
+                rucksack: Rucksack::from_str(r_s),
+            }),
         }
     }
 }
@@ -165,17 +173,25 @@ fn part_2(input: &str) {
     for line in input.lines() {
         str_rucksacks.push(line);
         if str_rucksacks.len() == 3 {
-            groups.push(
-                Group::from_str_rucksacks(
-                    str_rucksacks[..].try_into()
-                        .unwrap_or_else(|_| panic!("Group starting with rucksack {} could not be converted to array", &str_rucksacks[0]))));
+            groups.push(Group::from_str_rucksacks(
+                str_rucksacks[..].try_into().unwrap_or_else(|_| {
+                    panic!(
+                        "Group starting with rucksack {} could not be converted to array",
+                        &str_rucksacks[0]
+                    )
+                }),
+            ));
             str_rucksacks = Vec::new();
         }
     }
 
     // find badges of all groups
-    let badges: Vec<&Item> = groups.iter().map(|g| g.find_badge()
-        .unwrap_or_else(|| panic!("Group '{:?}' did not have a common badge", g)))
+    let badges: Vec<&Item> = groups
+        .iter()
+        .map(|g| {
+            g.find_badge()
+                .unwrap_or_else(|| panic!("Group '{:?}' did not have a common badge", g))
+        })
         .collect();
 
     // display sum of "priorities" (values) for each badge

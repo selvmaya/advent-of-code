@@ -1,12 +1,18 @@
-use std::ops::{RangeInclusive};
 use crate::Runnable;
+use std::ops::RangeInclusive;
 
 pub struct Solution;
 
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
-        println!("Amount of pairs where one range fully contains the other: {}", part_1_solve(&input));
-        println!("Amount of pairs that have any overlap at all: {}", part_2_solve(&input));
+        println!(
+            "Amount of pairs where one range fully contains the other: {}",
+            part_1_solve(&input)
+        );
+        println!(
+            "Amount of pairs that have any overlap at all: {}",
+            part_2_solve(&input)
+        );
     }
 }
 
@@ -54,21 +60,26 @@ mod tests {
 // every section has a unique "ID number" (we will represent this using u32)
 // each elf is assigned a range of section IDs. (range or vec?)
 struct Elf {
-    sections: RangeInclusive<u32>
+    sections: RangeInclusive<u32>,
 }
 
 impl Elf {
     fn from_range_str(range_str: &str) -> Result<Self, String> {
-        let str_range = match range_str.split_once('-')
-        {
+        let str_range = match range_str.split_once('-') {
             Some(s_r) => [s_r.0, s_r.1],
-            None => return Err(format!("'{}' could not be split into ranges for an elf", range_str))
+            None => {
+                return Err(format!(
+                    "'{}' could not be split into ranges for an elf",
+                    range_str
+                ))
+            }
         };
-        let int_r = str_range.iter()
+        let int_r = str_range
+            .iter()
             .map(|r| r.parse().expect(""))
             .collect::<Vec<u32>>();
         Ok(Elf {
-            sections: int_r[0]..=int_r[1]
+            sections: int_r[0]..=int_r[1],
         })
     }
 }
@@ -76,7 +87,7 @@ impl Elf {
 // many of the section assignments on the elves overlap
 // the elves pair up
 struct Pair {
-    elves: [Elf; 2]
+    elves: [Elf; 2],
 }
 
 // puzzle input is a list of the section assignments, where each line is a pair
@@ -85,10 +96,15 @@ impl Pair {
     fn from_str_line(line: &str) -> Result<Self, String> {
         let str_elves = match &line.split_once(',') {
             Some(s) => [s.0, s.1],
-            None => return Err(format!("'{}' could not be split into two string literals", &line))
+            None => {
+                return Err(format!(
+                    "'{}' could not be split into two string literals",
+                    &line
+                ))
+            }
         };
         Ok(Pair {
-            elves: str_elves.map(|e_s| Elf::from_range_str(e_s).unwrap())
+            elves: str_elves.map(|e_s| Elf::from_range_str(e_s).unwrap()),
         })
     }
 }
@@ -110,7 +126,10 @@ impl Pair {
 
 #[allow(unused)]
 fn part_1_solve(input: &str) -> u32 {
-    let pairs: Vec<Pair> = input.lines().map(|line| Pair::from_str_line(line).unwrap()).collect();
+    let pairs: Vec<Pair> = input
+        .lines()
+        .map(|line| Pair::from_str_line(line).unwrap())
+        .collect();
     let contained_overlaps: u32 = pairs.iter().filter(|&p| p.any_full_containment()).count() as u32;
     contained_overlaps
 }
@@ -135,7 +154,10 @@ impl Pair {
 
 #[allow(unused)]
 fn part_2_solve(input: &str) -> u32 {
-    let pairs: Vec<Pair> = input.lines().map(|line| Pair::from_str_line(line).unwrap()).collect();
+    let pairs: Vec<Pair> = input
+        .lines()
+        .map(|line| Pair::from_str_line(line).unwrap())
+        .collect();
     let section_overlaps: u32 = pairs.iter().filter(|p| p.find_any_overlap()).count() as u32;
     section_overlaps
 }

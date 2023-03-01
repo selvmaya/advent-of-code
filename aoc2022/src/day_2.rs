@@ -19,7 +19,10 @@ mod tests {
         let full_str = "A Y";
         let str_rounds = vec!["A", "Y"];
         assert_eq!(str_rounds, Round::split_round_str(full_str));
-        let round_example_1 = Round { opponent: Shape::Rock, player: Shape::Paper };
+        let round_example_1 = Round {
+            opponent: Shape::Rock,
+            player: Shape::Paper,
+        };
         let opponent = Shape::from_opponent_str_abc(str_rounds[0]).unwrap();
         let player = Shape::from_player_str_xyz(str_rounds[1]).unwrap();
         assert_eq!(round_example_1, Round { opponent, player });
@@ -60,16 +63,34 @@ mod tests {
     }
     #[test]
     fn round_outcome_works() {
-        let round: Round = Round {player: Shape::Rock, opponent: Shape::Scissors};
-        assert_eq!(Outcome::Win, round.player_fight_outcome(), "{:?} beats {:?}.", round.player, round.opponent);
+        let round: Round = Round {
+            player: Shape::Rock,
+            opponent: Shape::Scissors,
+        };
+        assert_eq!(
+            Outcome::Win,
+            round.player_fight_outcome(),
+            "{:?} beats {:?}.",
+            round.player,
+            round.opponent
+        );
     }
     #[test]
     fn round_points_work() {
-        let example_round_1: Round = Round { opponent: Shape::Rock, player: Shape::Paper };
+        let example_round_1: Round = Round {
+            opponent: Shape::Rock,
+            player: Shape::Paper,
+        };
         assert_eq!(8, example_round_1.player_round_score());
-        let example_round_2: Round = Round { opponent: Shape::Paper, player: Shape::Rock };
+        let example_round_2: Round = Round {
+            opponent: Shape::Paper,
+            player: Shape::Rock,
+        };
         assert_eq!(1, example_round_2.player_round_score());
-        let example_round_3: Round = Round { opponent: Shape::Scissors, player: Shape::Scissors };
+        let example_round_3: Round = Round {
+            opponent: Shape::Scissors,
+            player: Shape::Scissors,
+        };
         assert_eq!(6, example_round_3.player_round_score());
     }
 }
@@ -78,18 +99,18 @@ mod tests {
 enum Outcome {
     Loss,
     Draw,
-    Win
+    Win,
 }
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Shape {
     Rock,
     Paper,
-    Scissors
+    Scissors,
 }
 #[derive(PartialEq, Debug)]
 struct Round {
     player: Shape,
-    opponent: Shape
+    opponent: Shape,
 }
 
 impl Outcome {
@@ -99,18 +120,18 @@ impl Outcome {
             Shape::Rock => match other {
                 Shape::Rock => Outcome::Draw,
                 Shape::Paper => Outcome::Loss,
-                Shape::Scissors => Outcome::Win
+                Shape::Scissors => Outcome::Win,
             },
             Shape::Paper => match other {
                 Shape::Rock => Outcome::Win,
                 Shape::Paper => Outcome::Draw,
-                Shape::Scissors => Outcome::Loss
+                Shape::Scissors => Outcome::Loss,
             },
             Shape::Scissors => match other {
                 Shape::Rock => Outcome::Loss,
                 Shape::Paper => Outcome::Win,
-                Shape::Scissors => Outcome::Draw
-            }
+                Shape::Scissors => Outcome::Draw,
+            },
         }
     }
     fn from_outcome_str_xyz(s: &str) -> Result<Self, String> {
@@ -118,14 +139,14 @@ impl Outcome {
             "X" => Ok(Outcome::Loss),
             "Y" => Ok(Outcome::Draw),
             "Z" => Ok(Outcome::Win),
-            _ => Err(format!("{} is not a valid type to convert from XYZ!", s))
+            _ => Err(format!("{} is not a valid type to convert from XYZ!", s)),
         }
     }
     fn points(&self) -> u32 {
         match self {
             Outcome::Loss => 0,
             Outcome::Draw => 3,
-            Outcome::Win => 6
+            Outcome::Win => 6,
         }
     }
 }
@@ -136,7 +157,7 @@ impl Shape {
             "A" => Ok(Shape::Rock),
             "B" => Ok(Shape::Paper),
             "C" => Ok(Shape::Scissors),
-            _ => Err(format!("{} is not a valid type to convert from ABC!", s))
+            _ => Err(format!("{} is not a valid type to convert from ABC!", s)),
         }
     }
     fn from_player_str_xyz(s: &str) -> Result<Self, String> {
@@ -144,7 +165,7 @@ impl Shape {
             "X" => Ok(Shape::Rock),
             "Y" => Ok(Shape::Paper),
             "Z" => Ok(Shape::Scissors),
-            _ => Err(format!("{} is not a valid type to convert from XYZ!", s))
+            _ => Err(format!("{} is not a valid type to convert from XYZ!", s)),
         }
     }
     fn from_outcome_with_other(outcome: &Outcome, other: &Self) -> Self {
@@ -152,21 +173,21 @@ impl Shape {
             Outcome::Loss => match &other {
                 Shape::Rock => Shape::Scissors,
                 Shape::Paper => Shape::Rock,
-                Shape::Scissors => Shape::Paper
+                Shape::Scissors => Shape::Paper,
             },
             Outcome::Draw => *other,
             Outcome::Win => match &other {
                 Shape::Rock => Shape::Paper,
                 Shape::Paper => Shape::Scissors,
-                Shape::Scissors => Shape::Rock
-            }
+                Shape::Scissors => Shape::Rock,
+            },
         }
     }
     fn points(&self) -> u32 {
         match self {
             Shape::Rock => 1,
             Shape::Paper => 2,
-            Shape::Scissors => 3
+            Shape::Scissors => 3,
         }
     }
 }
@@ -178,18 +199,18 @@ impl Round {
         let opponent_str: &str;
         match str_rounds.first() {
             Some(s) => opponent_str = s,
-            None => return Err("No opponent found.".to_string())
+            None => return Err("No opponent found.".to_string()),
         };
         let player_str: &str;
         match str_rounds.last() {
             Some(s) => player_str = s,
-            None => return Err("No player found".to_string())
+            None => return Err("No player found".to_string()),
         };
 
         let opponent: Shape;
         match Shape::from_opponent_str_abc(opponent_str) {
             Ok(shape) => opponent = shape,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
         let player: Shape;
         match Shape::from_player_str_xyz(player_str) {
@@ -205,18 +226,18 @@ impl Round {
         let opponent_str: &str;
         match str_rounds.first() {
             Some(s) => opponent_str = s,
-            None => return Err("No opponent found.".to_string())
+            None => return Err("No opponent found.".to_string()),
         };
         let outcome_str: &str;
         match str_rounds.last() {
             Some(s) => outcome_str = s,
-            None => return Err("No outcome found".to_string())
+            None => return Err("No outcome found".to_string()),
         };
 
         let opponent: Shape;
         match Shape::from_opponent_str_abc(opponent_str) {
             Ok(shape) => opponent = shape,
-            Err(e) => return Err(e)
+            Err(e) => return Err(e),
         }
         let outcome: Outcome;
         match Outcome::from_outcome_str_xyz(outcome_str) {
@@ -246,16 +267,26 @@ impl Round {
 
 #[allow(unused)]
 fn part_2(str_rounds: &Vec<&str>) {
-    let rounds_part_2: Vec<Round> = str_rounds.iter()
-        .map(|r_s| Round::from_str_part_2(r_s).unwrap()).collect();
+    let rounds_part_2: Vec<Round> = str_rounds
+        .iter()
+        .map(|r_s| Round::from_str_part_2(r_s).unwrap())
+        .collect();
     let points_part_2 = Round::player_total_points(&rounds_part_2);
-    println!("Total points after all rounds using rules from part 2: {}", points_part_2);
+    println!(
+        "Total points after all rounds using rules from part 2: {}",
+        points_part_2
+    );
 }
 
 #[allow(unused)]
 fn part_1(str_rounds: &Vec<&str>) {
-    let rounds_part_1: Vec<Round> = str_rounds.iter()
-        .map(|r_s| Round::from_str_part_1(r_s).unwrap()).collect();
+    let rounds_part_1: Vec<Round> = str_rounds
+        .iter()
+        .map(|r_s| Round::from_str_part_1(r_s).unwrap())
+        .collect();
     let points_part_1 = Round::player_total_points(&rounds_part_1);
-    println!("Total points after all rounds using rules from part 1: {}", points_part_1);
+    println!(
+        "Total points after all rounds using rules from part 1: {}",
+        points_part_1
+    );
 }
