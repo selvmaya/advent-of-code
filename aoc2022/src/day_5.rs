@@ -27,7 +27,7 @@ struct CrateStack {
 impl From<&str> for CrateStack {
     fn from(value: &str) -> Self {
         CrateStack {
-            crates: value.chars().map(|c| Crate::from(c)).collect(),
+            crates: value.chars().map(Crate::from).collect(),
         }
     }
 }
@@ -70,9 +70,7 @@ fn add_crate_line_to_stacks(stacks: &mut HashMap<usize, CrateStack>, line: &str)
     for crate_key in 1..=line_crates.len() {
         let option_crate = line_crates[crate_key - 1]; // copy
         if let Some(c) = option_crate {
-            if !stacks.contains_key(&crate_key) {
-                stacks.insert(crate_key, CrateStack::new());
-            }
+            stacks.entry(crate_key).or_insert_with(CrateStack::new);
             stacks.get_mut(&crate_key).unwrap().crates.push(c);
         }
     }
@@ -119,14 +117,14 @@ fn process_move_on_stacks(stacks: &mut HashMap<usize, CrateStack>, mut move_to_p
     }
     // use move
     let mut crates_taken: Vec<Crate> = Vec::new();
-    let mut from_stack = stacks.get_mut(&move_to_process.source).unwrap();
+    let from_stack = stacks.get_mut(&move_to_process.source).unwrap();
     println!(
         "Stack {} before move: {:?}",
         &move_to_process.source, &from_stack.crates
     );
     for _ in 0..move_to_process.count {
-        if from_stack.crates.len() > 0 {
-            crates_taken.push(remove_crate_from_stack(&mut from_stack));
+        if !from_stack.crates.is_empty() {
+            crates_taken.push(remove_crate_from_stack(from_stack));
         }
     }
     println!(
@@ -260,7 +258,7 @@ move 1 from 1 to 2";
         };
         let mut empty_move_stacks = stacks_source.clone();
         process_move_on_stacks(&mut empty_move_stacks, empty_move);
-        let empty_move_expectation: HashMap<usize, CrateStack> = stacks_source.clone(); // we expect that nothing changes
+        let empty_move_expectation: HashMap<usize, CrateStack> = stacks_source; // we expect that nothing changes
         assert_eq!(&empty_move_expectation, &empty_move_stacks);
     }
     #[test]

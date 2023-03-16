@@ -1,31 +1,5 @@
 use std::{env, fs};
 
-// macro_rules! day_tests {
-//     ($($name:ident: $type:ty)*) => {
-//         $(
-//             mod $name {
-//                 use super::*;
-//                 #[test]
-//                 fn test() {
-//                     let c = <$type>::new();
-//                     assert_eq!(c, c);
-//                     match fs::read_to_string(format!("outputs/_part_2.txt")) {
-//                         Ok(r) => {
-//                             match r.parse::<u32>() {
-//                                 Ok(v) => {
-//                                     assert_eq!(v, part_1_solve(fs::read_to_string("inputs/day_4.txt").unwrap().as_str()))
-//                                 },
-//                                 Err(_) => {},
-//                             }
-//                         },
-//                         Err(_) => {}
-//                     }
-//                 }
-//             }
-//         )*
-//     };
-// }
-
 mod day_1;
 mod day_2;
 mod day_3;

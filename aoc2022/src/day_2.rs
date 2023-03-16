@@ -38,7 +38,7 @@ mod tests {
     #[test]
     fn draw_outcomes_work() {
         for shape in &[Shape::Rock, Shape::Paper, Shape::Scissors] {
-            assert_eq!(Outcome::Draw, Outcome::from_fight(&shape, &shape));
+            assert_eq!(Outcome::Draw, Outcome::from_fight(shape, shape));
         }
     }
     #[test]
@@ -196,25 +196,21 @@ impl Round {
     fn from_str_part_1(full_str: &str) -> Result<Round, String> {
         let str_rounds: Vec<&str> = Round::split_round_str(full_str);
 
-        let opponent_str: &str;
-        match str_rounds.first() {
-            Some(s) => opponent_str = s,
+        let opponent_str: &str = match str_rounds.first() {
+            Some(s) => s,
             None => return Err("No opponent found.".to_string()),
         };
-        let player_str: &str;
-        match str_rounds.last() {
-            Some(s) => player_str = s,
+        let player_str: &str = match str_rounds.last() {
+            Some(s) => s,
             None => return Err("No player found".to_string()),
         };
 
-        let opponent: Shape;
-        match Shape::from_opponent_str_abc(opponent_str) {
-            Ok(shape) => opponent = shape,
+        let opponent: Shape = match Shape::from_opponent_str_abc(opponent_str) {
+            Ok(shape) => shape,
             Err(e) => return Err(e),
-        }
-        let player: Shape;
-        match Shape::from_player_str_xyz(player_str) {
-            Ok(shape) => player = shape,
+        };
+        let player: Shape = match Shape::from_player_str_xyz(player_str) {
+            Ok(shape) => shape,
             Err(e) => return Err(e),
         };
 
@@ -223,25 +219,21 @@ impl Round {
     fn from_str_part_2(full_str: &str) -> Result<Round, String> {
         let str_rounds: Vec<&str> = Round::split_round_str(full_str);
 
-        let opponent_str: &str;
-        match str_rounds.first() {
-            Some(s) => opponent_str = s,
+        let opponent_str: &str = match str_rounds.first() {
+            Some(s) => s,
             None => return Err("No opponent found.".to_string()),
         };
-        let outcome_str: &str;
-        match str_rounds.last() {
-            Some(s) => outcome_str = s,
+        let outcome_str: &str = match str_rounds.last() {
+            Some(s) => s,
             None => return Err("No outcome found".to_string()),
         };
 
-        let opponent: Shape;
-        match Shape::from_opponent_str_abc(opponent_str) {
-            Ok(shape) => opponent = shape,
+        let opponent: Shape = match Shape::from_opponent_str_abc(opponent_str) {
+            Ok(shape) => shape,
             Err(e) => return Err(e),
-        }
-        let outcome: Outcome;
-        match Outcome::from_outcome_str_xyz(outcome_str) {
-            Ok(out) => outcome = out,
+        };
+        let outcome: Outcome = match Outcome::from_outcome_str_xyz(outcome_str) {
+            Ok(out) => out,
             Err(e) => return Err(e),
         };
         let player = Shape::from_outcome_with_other(&outcome, &opponent);
@@ -260,13 +252,13 @@ impl Round {
         let outcome_score = &self.player_fight_outcome().points();
         shape_score + outcome_score
     }
-    fn player_total_points(rounds: &Vec<Self>) -> u32 {
+    fn player_total_points(rounds: &[Self]) -> u32 {
         rounds.iter().map(|r| r.player_round_score()).sum()
     }
 }
 
 #[allow(unused)]
-fn part_2(str_rounds: &Vec<&str>) {
+fn part_2(str_rounds: &[&str]) {
     let rounds_part_2: Vec<Round> = str_rounds
         .iter()
         .map(|r_s| Round::from_str_part_2(r_s).unwrap())
@@ -279,7 +271,7 @@ fn part_2(str_rounds: &Vec<&str>) {
 }
 
 #[allow(unused)]
-fn part_1(str_rounds: &Vec<&str>) {
+fn part_1(str_rounds: &[&str]) {
     let rounds_part_1: Vec<Round> = str_rounds
         .iter()
         .map(|r_s| Round::from_str_part_1(r_s).unwrap())

@@ -42,7 +42,7 @@ impl Runnable for Solution {
             }
         }
 
-        elves.sort_by(|a, b| b.total_calories().cmp(&a.total_calories()));
+        elves.sort_by_key(|b| std::cmp::Reverse(b.total_calories()));
         let sorted_elves = elves;
 
         println!(
