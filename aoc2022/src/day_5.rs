@@ -1,23 +1,24 @@
-use core::fmt;
-
-use crate::Runnable;
-
-use itertools::Itertools;
-#[allow(unused_imports)] // todo: remove
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take, take_while1},
-    combinator::{all_consuming, map, map_res, opt},
-    sequence::{delimited, preceded, tuple},
-    Finish, IResult,
+use {
+    core::fmt,
+    crate::Runnable,
+    itertools::Itertools,
+    nom::{
+        branch::alt,
+        bytes::complete::{tag, take},
+        character::complete::digit1,
+        combinator::{all_consuming, map, map_res},
+        multi::separated_list1,
+        sequence::{delimited, preceded, tuple},
+        Finish, IResult,
+    }
 };
 
 pub struct Solution;
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
         // println!(
-            // "Crates on top of each stack after moves: {}",
-            part_1_solve(input.as_str());
+        // "Crates on top of each stack after moves: {}",
+        part_1_solve(input.as_str());
         // );
     }
 }
@@ -47,19 +48,7 @@ fn parse_crate_or_hole(i: &str) -> IResult<&str, Option<Crate>> {
     alt((map(parse_crate, Some), map(parse_hole, |_| None)))(i) // parse for crate, then try hole, otherwise fail
 }
 fn parse_crate_line(i: &str) -> IResult<&str, Vec<Option<Crate>>> {
-    let (mut i, c) = parse_crate_or_hole(i)?;
-    let mut v = vec![c];
-
-    loop {
-        let (next_i, maybe_c) = opt(preceded(tag(" "), parse_crate_or_hole))(i)?;
-        match maybe_c {
-            Some(c) => v.push(c),
-            None => break,
-        }
-        i = next_i;
-    }
-
-    Ok((i, v))
+    separated_list1(tag(" "), parse_crate_or_hole)(i)
 }
 
 struct Piles(Vec<Vec<Crate>>);
@@ -92,9 +81,7 @@ impl Piles {
 }
 
 fn parse_number(i: &str) -> IResult<&str, usize> {
-    map_res(take_while1(|c: char| c.is_ascii_digit()), |s: &str| {
-        s.parse::<usize>()
-    })(i)
+    map_res(digit1, |s: &str| s.parse::<usize>())(i)
 }
 fn parse_pile_number(i: &str) -> IResult<&str, usize> {
     map(parse_number, |i| i - 1)(i) // convert from 1-indexed to 0-indexed
@@ -120,7 +107,8 @@ fn parse_instruction(i: &str) -> IResult<&str, Instruction> {
 fn part_1_solve(input: &str) {
     let mut lines = input.lines();
 
-    let crate_lines: Vec<_> = (&mut lines)
+    let crate_lines: Vec<_> = lines
+        .by_ref()
         .map_while(|line| {
             all_consuming(parse_crate_line)(line)
                 .finish()
@@ -132,7 +120,7 @@ fn part_1_solve(input: &str) {
     println!("{piles:?}");
 
     assert!(lines.next().unwrap().is_empty());
-    
+
     for ins in lines.map(|line| all_consuming(parse_instruction)(line).finish().unwrap().1) {
         println!("{ins:?}");
         piles.apply_2(ins);
