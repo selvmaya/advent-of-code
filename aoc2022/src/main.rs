@@ -7,6 +7,7 @@ mod day_4;
 mod day_5;
 mod day_6;
 mod day_7;
+mod day_8;
 
 trait Runnable {
     fn run_with_input(&self, input: String);
@@ -58,6 +59,10 @@ fn main() {
         Configuration {
             runnable: Box::new(day_7::Solution),
             number: 7,
+        },
+        Configuration {
+            runnable: Box::new(day_8::Solution),
+            number: 8,
         }
     ];
     let args: Vec<String> = env::args().collect();

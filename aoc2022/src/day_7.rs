@@ -1,9 +1,10 @@
-use std::cell::RefCell;
+#![allow(dead_code)]
+
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use camino::Utf8PathBuf;
 
+use id_tree::{Tree, Node};
 use nom::{IResult, Finish};
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
@@ -12,11 +13,13 @@ use nom::sequence::{preceded, separated_pair};
 
 use crate::Runnable;
 
+
 pub struct Solution;
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
         let input = input.as_str();
         part_1_solve(input);
+        part_2_solve(input);
     }
 }
 
@@ -26,42 +29,57 @@ fn part_1_solve(input: &str) {
         .lines()
         .map(|l| all_consuming(parse_line)(l).finish().unwrap().1);
 
-    let mut root_dir = Directory { path: Utf8PathBuf::default(), parent_dir: None, sub_entries: HashMap::new() };
-    let root_ref = Rc::new(RefCell::new(root_dir));
-    let mut current_dir = &root_ref.clone();
+    let (dir_tree, root_id) = construct_dir_tree(lines);
+
+    // find all directories in tree with a size <=100_000, then sum them together
+    let sum_of_small_ish_directories = dir_tree
+        .traverse_pre_order(&root_id).expect("could not traverse tree?")
+        .map(|dir_n| recursive_dir_size(&dir_tree, dir_n))
+        .filter(|&size| size <= 100_000)
+        .sum::<u64>();
+    println!("Sum of directories under size 100_000: {sum_of_small_ish_directories}");
+}
+
+fn construct_dir_tree(lines: impl Iterator<Item = Line>) -> (Tree<Directory>, id_tree::NodeId) {
+    let mut dir_tree: Tree<Directory> = Tree::new();
+    let root_id = dir_tree.insert(Node::new(Directory { path: "/".into(), files: HashMap::new() }), id_tree::InsertBehavior::AsRoot).unwrap();
+    let mut current_id = root_id.clone();
     for line in lines {
-        println!("{line:?}");
         match line {
             Line::Command(cmd) => match cmd {
                 Command::Ls => { }, // ignore these
                 Command::Cd(path) => match path.as_str() {
-                    "/" => {
-                        current_dir = &root_ref.clone();
+                    "/" => { // only happens once (first line)
+                        current_id = root_id.clone(); // shouldn't really be necessary in this input?
                     },
                     ".." => { // move up one folder
-                        let parent: Rc<RefCell<Directory>> = current_dir.as_ref().borrow().parent_dir.clone().unwrap();
-                        current_dir = &parent;
+                        current_id = dir_tree
+                        .get(&current_id).expect("node exists in tree")
+                        .parent().expect("node has a parent")
+                            .clone();
                     },
                     _ => { // change directory/path to child directory
-                        let mut temp = current_dir.borrow_mut();
-                        let child = temp.sub_entries
-                            .entry(path.clone())
-                            .or_insert(Entry::Dir(
-                                Rc::new(RefCell::new(Directory { path, parent_dir: Some(current_dir.clone()), sub_entries: HashMap::new() }))
-                            ));
-                        let Entry::Dir(child_dir) = child else {
-                            panic!("Newly created ('cd') entry was not directory?");
-                        };
-                        current_dir = child_dir;
+                        current_id = dir_tree.insert(
+                            Node::new(Directory {
+                                path: path.clone(),
+                                files: HashMap::new()
+                            }), id_tree::InsertBehavior::UnderNode(&current_id)
+                        ).expect("insertion should work");
                     }
                 },
             },
             Line::Entry(entry) => match entry {
-                Entry::Dir(_) => todo!(),
-                Entry::File(_) => todo!(),
-            }
+                Entry::Dir(_) => { }, // we create directories when we cd into them, no need to do it now
+                Entry::File(file) => { // add file to current directory
+                    let current_dir = dir_tree.get_mut(&current_id).expect("current directory exists").data_mut();
+                    if let Some(_old_value) = current_dir.files.insert(file.path.clone(), file) {
+                        panic!("Inserted file that already existed?");
+                    }
+                },
+            },
         }
     }
+    (dir_tree, root_id)
 }
 
 fn parse_path(i: &str) -> IResult<&str, Utf8PathBuf> {
@@ -105,28 +123,25 @@ fn parse_command(i: &str) -> IResult<&str, Command> {
 #[derive(Debug)]
 struct File { path: Utf8PathBuf, size: u64 }
 
-type DirHandle = Rc<RefCell<Directory>>;
 #[derive(Debug)]
-struct Directory { path: Utf8PathBuf, parent_dir: Option<DirHandle>, sub_entries: HashMap<Utf8PathBuf, Entry> }
+struct Directory { path: Utf8PathBuf, files: HashMap<Utf8PathBuf, File> }
 impl Directory {
-    fn total_size(&self) -> u64 {
-        self.sub_entries.values().map(|entry| {
-            match entry {
-                Entry::Dir(sub_dir) => sub_dir.borrow().total_size(),
-                Entry::File(file) => file.size,
-            }
-        }).sum()
+    fn file_size_sum(&self) -> u64 {
+        self.files.values().map(|file| file.size).sum()
     }
 }
-impl PartialEq for Directory {
-    fn eq(&self, other: &Self) -> bool { // comparison where we ignore files and assume they are correct
-        self.path == other.path && self.parent_dir == other.parent_dir
-    }
+fn recursive_dir_size(tree: &Tree<Directory>, node: &Node<Directory>) -> u64 {
+    let size_of_files_at_level = node.data().file_size_sum();
+    let size_of_file_under_level = node.children()
+    .iter()
+    .map(|child_id| recursive_dir_size(tree, tree.get(child_id).expect("child did not exist?")))
+    .sum::<u64>();
+size_of_files_at_level + size_of_file_under_level
 }
 
 #[derive(Debug)]
 enum Entry {
-    Dir(DirHandle),
+    Dir(Directory),
     File(File),
 }
 fn parse_entry(i: &str) -> IResult<&str, Entry> {
@@ -136,7 +151,7 @@ fn parse_entry(i: &str) -> IResult<&str, Entry> {
     );
     let parse_dir = map(
         preceded(tag("dir "), parse_path),
-        |path| Entry::Dir(Rc::new(RefCell::new(Directory { path, parent_dir: None, sub_entries: HashMap::new() })))
+        |path| Entry::Dir(Directory { path, files: HashMap::new() })
     );
     
     alt((parse_file, parse_dir))(i)
@@ -154,18 +169,24 @@ fn parse_line(i: &str) -> IResult<&str, Line> {
     ))(i)
 }
 
-// unknown
+// find the smallest directory that would free up enough space for NEEDED_MIN_DISK_SPACE
 fn part_2_solve(input: &str) {
+    let lines = input
+            .lines()
+            .map(|l| all_consuming(parse_line)(l).finish().unwrap().1);
+        
+    let (dir_tree, root_id) = construct_dir_tree(lines);
+    
+    const TOTAL_SPACE: u64 = 70_000_000;
+    const NEEDED_FREE_SPACE: u64 = 30_000_000;
+    let used_space = recursive_dir_size(&dir_tree, dir_tree.get(&root_id).expect("root missing?"));
+    let free_space = TOTAL_SPACE.checked_sub(used_space).expect("used space exceeded total space?");
+    let min_space_to_free = NEEDED_FREE_SPACE.checked_sub(free_space).expect("free space exceeded needed space?");
 
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    mod part_1 {
-        use super::*;
-    }
-    mod part_2 {
-        use super::*;
-    }
+    let smallest_fit_dir_size = dir_tree
+        .traverse_pre_order(&root_id).expect("could not traverse tree?")
+        .map(|dir_n| recursive_dir_size(&dir_tree, dir_n))
+        .filter(|&s| s >= min_space_to_free)
+        .min().expect("No value found in iterator?");
+    println!("Size of smallest directory that gives enough space for update: {smallest_fit_dir_size}");
 }
