@@ -5,41 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
             "request": "launch",
-            "name": "Debug executable 'aoc2022'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=aoc2022",
-                    "--package=aoc2022"
-                ],
-                "filter": {
-                    "name": "aoc2022",
-                    "kind": "bin"
-                }
-            },
+            "program": "${workspaceRoot}/target/debug/${workspaceFolderBasename}.exe",
+            "preLaunchTask": "rust: cargo build",
             "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'aoc2022'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=aoc2022",
-                    "--package=aoc2022"
-                ],
-                "filter": {
-                    "name": "aoc2022",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "externalTerminal"
         }
     ]
 }

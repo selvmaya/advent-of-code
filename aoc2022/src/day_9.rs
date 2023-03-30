@@ -15,6 +15,8 @@ mod parse;
 
 use eframe::egui;
 
+use self::parse::GridPos;
+
 fn part_1_solve(input: &str) -> usize {
     let instructions = input
         .lines()
@@ -37,10 +39,12 @@ fn part_1_solve(input: &str) -> usize {
 
 struct MyApp {
     instructions: Vec<Instruction>,
+    head: GridPos,
+    tail: GridPos,
 }
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Instructions:");
             for ins in &self.instructions {
                 let arrow = match ins.dir {
@@ -51,6 +55,9 @@ impl eframe::App for MyApp {
                 };
                 ui.label(arrow.repeat(ins.dist as _));
             }
+        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            
         });
     }
 }
