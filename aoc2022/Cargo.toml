@@ -12,6 +12,9 @@ nom = "7.1.1"
 itertools = "0.10.5"
 camino = "1.1.4"
 id_tree = "1.8.0"
+egui = "0.21"
+eframe = "0.21"
+const_format = "0.2.30"
 
 [dev-dependencies]
 test-case = "3.0.0"
