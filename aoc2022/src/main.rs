@@ -20,8 +20,12 @@ struct Configuration {
 impl Configuration {
     fn run(&self, should_run_test: bool) {
         self.run_with_input(match should_run_test {
-            true => self.get_test_input_from_number().unwrap_or_else(|_| panic!("*TEST* input missing for day {}", self.number)),
-            false => self.get_input_from_number().unwrap_or_else(|_| panic!("Input missing for day {}", self.number)),
+            true => self
+                .get_test_input_from_number()
+                .unwrap_or_else(|_| panic!("*TEST* input missing for day {}", self.number)),
+            false => self
+                .get_input_from_number()
+                .unwrap_or_else(|_| panic!("Input missing for day {}", self.number)),
         })
     }
     fn run_with_input(&self, input: String) {
@@ -81,20 +85,24 @@ fn main() {
     args.next(); // discard first element since it isn't user-relevant
 
     let selection_arg = args.next(); // argument 1 determines what configuration to run
-    let try_run_as_test = match args.next() { // argument 2 determines if it should try and use test input
+    let try_run_as_test = match args.next() {
+        // argument 2 determines if it should try and use test input
         Some(val) => matches!(val.as_str(), "test"),
         _ => false,
     };
 
-    if let Some(selection) = selection_arg { // run a specific configuration
+    if let Some(selection) = selection_arg {
+        // run a specific configuration
         for configuration in &all_configurations {
             if selection.as_str() == configuration.number.to_string().as_str() {
                 configuration.run(try_run_as_test);
                 println!();
             }
         }
-    } else { // default runs everything
-        all_configurations.iter()
-            .for_each(|c| c.run_with_input(c.get_input_from_number().expect("Could not find input!")));
+    } else {
+        // default runs everything
+        all_configurations.iter().for_each(|c| {
+            c.run_with_input(c.get_input_from_number().expect("Could not find input!"))
+        });
     }
 }

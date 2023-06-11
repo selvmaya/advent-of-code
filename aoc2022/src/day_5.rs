@@ -1,6 +1,6 @@
 use {
-    core::fmt,
     crate::Runnable,
+    core::fmt,
     itertools::Itertools,
     nom::{
         branch::alt,
@@ -10,7 +10,7 @@ use {
         multi::separated_list1,
         sequence::{delimited, preceded, tuple},
         Finish, IResult,
-    }
+    },
 };
 
 pub struct Solution;
