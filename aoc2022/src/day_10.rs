@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use std::ops::Range;
 use std::str::FromStr;
 
 use crate::Runnable;
@@ -124,14 +123,13 @@ impl Cpu {
 /// The display is 40 pixels wide and 6 pixels tall.
 /// The sprite is 3 pixels wide, and its position is the middle of those pixels.
 /// 
-/// The CRT draws a single pixel (during) each cycle.
+/// The CRT draws a single pixel (during) each cycle, left to right in scanline.
 /// A pixel is signaled "on" (lit) with the '#' character,
 /// and "off" (dark) with the '.' character.
 /// 
 /// Since the CRT can only draw one pixel at a time,
 /// it will take multiple cycles to draw the full sprite.
-/// This means that while the 'X' register on the CPU doesn't move,
-/// we must continue drawing the same sprite, with offsets 0-2.
+/// The sprite will only be fully drawn the standard way if the register does not move during drawing.
 /// 
 /// SOLVE: What eight capital letters appear on the CRT?
 fn part_2_solve(input: &str) -> String {
@@ -163,7 +161,7 @@ fn part_2_solve(input: &str) -> String {
 }
 #[derive(Clone, Copy)]
 enum Pixel {
-    Dark, // default, treated as "unknown"
+    Dark, // default, also treated as "unknown"
     Lit,
 }
 impl Display for Pixel {
