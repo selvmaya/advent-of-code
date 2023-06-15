@@ -1,6 +1,5 @@
 use std::fmt::Display;
 use std::ops::Range;
-use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 use crate::Runnable;
@@ -8,8 +7,8 @@ use crate::Runnable;
 pub struct Solution;
 impl Runnable for Solution {
     fn run_with_input(&self, input: String) {
-        println!("PART 1: {}", part_1_solve(&input));
-        println!("PART 2: {}", part_2_solve(&input));
+        println!("PART 1:\n{}\n", part_1_solve(&input));
+        println!("PART 2:\n{}\n", part_2_solve(&input));
     }
 }
 
@@ -28,14 +27,14 @@ impl Runnable for Solution {
 /// SOLVE: find sum of signals strengths during relevant cycles  
 fn part_1_solve(input: &str) -> isize {
     let instructions: Vec<Instruction> = input.lines().map(|line| line.parse().unwrap()).collect();
-    let mut cpu = Cpu { x: 1, total_cycle_count: 1, state: CpuState::ReadyForInstruction, state_cycle_count: 0 };
+    let mut cpu = Cpu::default();
     let mut cycles_to_read_signal_strength: Vec<usize> = vec![20, 60, 100, 140, 180, 220];
     let mut read_cycle_signal_strength = vec![];
     for instruction in instructions {
         cpu.give_instruction(instruction);
         while let CpuState::RunningInstruction(_) = &cpu.state {
             if let Some(cycle_read) = cycles_to_read_signal_strength.first() {
-                if &cpu.total_cycle_count == cycle_read {
+                if &cpu.cycle_count() == cycle_read {
                     cycles_to_read_signal_strength.remove(0);
                     read_cycle_signal_strength.push(cpu.read_signal_strength());
                 }
@@ -74,16 +73,21 @@ enum CpuState {
 type Register = isize;
 struct Cpu {
     x: Register,
-    total_cycle_count: usize,
+    total_cycle_index: usize,
     state: CpuState,
     state_cycle_count: usize
+}
+impl Default for Cpu {
+    fn default() -> Self {
+        Self { x: 1, total_cycle_index: 0, state: CpuState::ReadyForInstruction, state_cycle_count: 0 }
+    }
 }
 impl Cpu {
     fn run_cycle(&mut self) {
         let CpuState::RunningInstruction(instruction) = &self.state else {
             panic!("Should never be able to call this function without an active instruction");
         };
-        self.total_cycle_count += 1;
+        self.total_cycle_index += 1;
         self.state_cycle_count += 1;
         match instruction {
             Instruction::AddX(v) => {
@@ -106,8 +110,11 @@ impl Cpu {
         self.state = CpuState::RunningInstruction(instruction);
         self.state_cycle_count = 0;
     }
+    fn cycle_count(&self) -> usize {
+        self.total_cycle_index + 1
+    }
     fn read_signal_strength(&self) -> isize {
-        self.total_cycle_count as isize * self.x // todo: check if cast may be invalid
+        self.cycle_count() as isize * self.x
     }
 }
 
@@ -132,56 +139,24 @@ fn part_2_solve(input: &str) -> String {
         .filter(|line| !line.trim().is_empty())
         .map(|line| line.parse().unwrap())
         .collect();
-    let mut cpu = Cpu { x: 1, total_cycle_count: 1, state: CpuState::ReadyForInstruction, state_cycle_count: 0 };
     let mut crt = Crt::default();
     let mut crt_output_buffer = vec![];
-    let mut new_sprite_pos = None;
     for instruction in instructions {
-        cpu.give_instruction(instruction);
-        while let CpuState::RunningInstruction(_) = &cpu.state {
-            crt.draw_next_pixel(new_sprite_pos);
-            const CRT_DISPLAY_CYCLE_RANGE: Range<u8> = 0..CYCLES_IN_CRT_DISPLAY;
-            if !CRT_DISPLAY_CYCLE_RANGE.contains(&crt.display_cycles) {
+        crt.cpu.give_instruction(instruction);
+        while let CpuState::RunningInstruction(_) = &crt.cpu.state {
+            let sprite_area = crt.cpu.x - 1 ..= crt.cpu.x + 1;
+            if sprite_area.contains(&(crt.pixel_index() as isize)) {
+                crt.draw_pixel();
+            }
+
+            crt.cpu.run_cycle();
+
+            if crt.cpu.total_cycle_index % CYCLES_IN_CRT_DISPLAY == 0 {
                 let output = format!("{}", crt);
                 crt_output_buffer.push(output);
-                crt = Crt { last_sprite_pos: crt.last_sprite_pos, ..Default::default() };
-            } else if crt.display_cycles / PIXELS_IN_SCANLINE == 1 {
-                crt.sprite_cycles = 0;
+                crt.display = DEFAULT_DISPLAY;
+                println!();
             }
-
-            { // UPDATE DEBUG INFO (step by step)
-                println!("CRT --- display_cycle: {}; sprite_x: {}; sprite_cycles: {}", crt.display_cycles, crt.last_sprite_pos, crt.sprite_cycles);
-                let scanline_index = crt.display_cycles / PIXELS_IN_SCANLINE;
-                let active_scanline = crt.display[scanline_index as usize];
-                let scanline_display = {
-                    let mut scanline_display = active_scanline.iter().map(|pixel| format!("{}", pixel)).collect::<String>();
-                    for offset in -1..=1 {
-                        const INDEX_RANGE: Range<i8> = 0..(PIXELS_IN_SCANLINE as i8);
-                        let index = (crt.last_sprite_pos + offset) as usize;
-                        if INDEX_RANGE.contains(&crt.last_sprite_pos) {
-                            let mut chars: Vec<char> = scanline_display.chars().collect();
-                            chars[index] = if chars[index] == '#' { '█' } else { '▒' };
-                            scanline_display = chars.into_iter().collect();
-                        }
-                    }
-                    scanline_display
-                };
-                println!("LINE--| {}", scanline_display);
-                println!("CPU --- cycle: {}; state: {:?}, x: {}", cpu.total_cycle_count, cpu.state, cpu.x);
-            }
-
-            cpu.run_cycle();
-            new_sprite_pos = if cpu.state == CpuState::ReadyForInstruction {
-                let pos = cpu.x as i8;
-                const DRAW_RANGE: RangeInclusive<i8> = -1..=(PIXELS_IN_SCANLINE as i8);
-                if !DRAW_RANGE.contains(&pos) {
-                    panic!("draw position is {}, cpu.x register is {}", &pos, &cpu.x);
-                }
-                Some(pos)
-            } else {
-                None
-            };
-            
         }
     }
     crt_output_buffer.join("\n")
@@ -194,22 +169,20 @@ enum Pixel {
 impl Display for Pixel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
-            Pixel::Dark => '_',
+            Pixel::Dark => '.',
             Pixel::Lit => '#',
         })
     }
 }
-const PIXELS_IN_SCANLINE: u8 = 40;
-const SCANLINES_IN_CRT: u8 = 6;
-const CYCLES_IN_CRT_DISPLAY: u8 = PIXELS_IN_SCANLINE * SCANLINES_IN_CRT;
-type Scanline = [Pixel; PIXELS_IN_SCANLINE as usize]; // 40: 0-39
-type CrtDisplay = [Scanline; SCANLINES_IN_CRT as usize]; // 6: 0-5
+const PIXELS_IN_SCANLINE: usize = 40;
+const SCANLINES_IN_CRT: usize = 6;
+const CYCLES_IN_CRT_DISPLAY: usize = PIXELS_IN_SCANLINE * SCANLINES_IN_CRT;
+type Scanline = [Pixel; PIXELS_IN_SCANLINE]; // 40: 0-39
+type CrtDisplay = [Scanline; SCANLINES_IN_CRT]; // 6: 0-5
 const DEFAULT_DISPLAY: CrtDisplay = [[Pixel::Dark; 40]; 6];
 struct Crt {
     display: CrtDisplay,
-    display_cycles: u8, // 240: 0-239
-    last_sprite_pos: i8, // 42: (-1)-40, can be 1 outside display pixels (0-39)
-    sprite_cycles: usize,
+    cpu: Cpu
 }
 impl Display for Crt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -228,38 +201,23 @@ impl Display for Crt {
 impl Default for Crt {
     fn default() -> Self {
         Crt {
+            cpu: Cpu::default(),
             display: DEFAULT_DISPLAY,
-            display_cycles: 0,
-            last_sprite_pos: 1,
-            sprite_cycles: 0,
         }
     }
 }
 impl Crt {
-    fn draw_next_pixel(&mut self, new_sprite_position: Option<i8>) {
-        if let Some(new_position) = new_sprite_position {
-            const VALID_SPRITE_POSITIONS: RangeInclusive<i8> = -1..=(PIXELS_IN_SCANLINE as i8);
-            assert!(VALID_SPRITE_POSITIONS.contains(&new_position));
-
-            self.sprite_cycles = 0;
-            self.last_sprite_pos = new_position;
-        }
-
-        let draw_signed_offset = match self.last_sprite_pos {
-            ..=-1 => 1,
-            40.. => -1,
-            0 => i8::clamp(self.sprite_cycles as i8, 0, 1),
-            39 => i8::clamp(-1 + self.sprite_cycles as i8, -1, 0),
-            _ => i8::clamp(-1 + self.sprite_cycles as i8, -1, 1)
-        };
-
-        let pixel_index = (self.last_sprite_pos + draw_signed_offset) as u8;
-        let scanline_index = self.display_cycles / PIXELS_IN_SCANLINE; // integer division is quotient
-        self.display[scanline_index as usize][pixel_index as usize] = Pixel::Lit;
-
-        // update cycle count
-        self.sprite_cycles += 1;
-        self.display_cycles += 1;
+    fn crt_cycle_index(&self) -> usize {
+        self.cpu.total_cycle_index % CYCLES_IN_CRT_DISPLAY
+    }
+    fn scanline_index(&self) -> usize {
+        self.crt_cycle_index() / PIXELS_IN_SCANLINE
+    }
+    fn pixel_index(&self) -> usize {
+        self.crt_cycle_index() % PIXELS_IN_SCANLINE
+    }
+    fn draw_pixel(&mut self) {
+        self.display[self.scanline_index()][self.pixel_index()] = Pixel::Lit;
     }
 }
 
@@ -273,10 +231,9 @@ mod tests {
     }
     #[test]
     fn part_2_test() {
-        let result = part_2_solve(include_str!("day_10_sample_1.txt"));
-        println!("RESULT:\n{}\n", &result);
-        let answer = include_str!("day_10_answer_2.txt");
-        println!("EXPECTED:\n{}\n", &answer);
+        let output = part_2_solve(include_str!("day_10_sample_1.txt"));
+        let result: Vec<&str> = output.lines().collect();
+        let answer: Vec<&str> = include_str!("day_10_answer_2.txt").lines().collect();
         assert_eq!(result, answer);
     }
 }
