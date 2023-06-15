@@ -9,6 +9,7 @@ mod day_6;
 mod day_7;
 mod day_8;
 mod day_9;
+mod day_10;
 
 trait Runnable {
     fn run_with_input(&self, input: String);
@@ -79,6 +80,10 @@ fn main() {
         Configuration {
             runnable: Box::new(day_9::Solution),
             number: 9,
+        },
+        Configuration {
+            runnable: Box::new(day_10::Solution),
+            number: 10,
         },
     ];
     let mut args = env::args();

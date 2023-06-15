@@ -306,12 +306,12 @@ impl LinkedTail {
             next: Some(Box::new(LinkedTail::spawn_recursive(length_remaining - 1))),
         }
     }
-    fn bottom_value(&self) -> &LinkedTail {
-        match &self.next {
-            Some(n) => n.bottom_value(),
-            None => self,
-        }
-    }
+    // fn bottom_value(&self) -> &LinkedTail {
+    //     match &self.next {
+    //         Some(n) => n.bottom_value(),
+    //         None => self,
+    //     }
+    // }
     fn move_recursive(&mut self, new_pos: &Position) {
         if &self.pos == new_pos {
             return; // no need to move to a position we are already at
