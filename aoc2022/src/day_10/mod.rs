@@ -17,12 +17,12 @@ impl Runnable for Solution {
 /// - "addx V" (where 'V' is a signed integer),
 /// takes two cycles to complete, and changes 'X' by 'V' *at the end of the second cycle*.
 /// - "noop", takes one cycle to complete and does nothing.
-/// 
+///
 /// 'signal strengths' is the cycle count (starting at one, increased by instructions),
 /// multiplied by the value of register 'X'.
 ///  
 /// relevant cycles: 60th, 100th, 140th, 180th and 220th cycles (20 += 40 -> 220)
-/// 
+///
 /// SOLVE: find sum of signals strengths during relevant cycles  
 fn part_1_solve(input: &str) -> isize {
     let instructions: Vec<Instruction> = input.lines().map(|line| line.parse().unwrap()).collect();
@@ -46,20 +46,21 @@ fn part_1_solve(input: &str) -> isize {
 #[derive(Debug, PartialEq)]
 enum Instruction {
     AddX(isize),
-    Noop
+    Noop,
 }
 impl FromStr for Instruction {
     type Err = String;
     fn from_str(line: &str) -> Result<Self, Self::Err> {
         let line = line.trim();
         if let Some((_, x_str)) = line.split_once(' ') {
-            let x = x_str.parse().map_err(|_| "Could not parse value as int".to_string())?;
+            let x = x_str
+                .parse()
+                .map_err(|_| "Could not parse value as int".to_string())?;
             Ok(Self::AddX(x))
-        }
-        else {
+        } else {
             match line {
                 "noop" => Ok(Self::Noop),
-                _ => Err(format!("No valid value found in '{}'", line,))
+                _ => Err(format!("No valid value found in '{}'", line,)),
             }
         }
     }
@@ -67,18 +68,23 @@ impl FromStr for Instruction {
 #[derive(Debug, PartialEq)]
 enum CpuState {
     RunningInstruction(Instruction),
-    ReadyForInstruction
+    ReadyForInstruction,
 }
 type Register = isize;
 struct Cpu {
     x: Register,
     total_cycle_index: usize,
     state: CpuState,
-    state_cycle_count: usize
+    state_cycle_count: usize,
 }
 impl Default for Cpu {
     fn default() -> Self {
-        Self { x: 1, total_cycle_index: 0, state: CpuState::ReadyForInstruction, state_cycle_count: 0 }
+        Self {
+            x: 1,
+            total_cycle_index: 0,
+            state: CpuState::ReadyForInstruction,
+            state_cycle_count: 0,
+        }
     }
 }
 impl Cpu {
@@ -94,17 +100,19 @@ impl Cpu {
                     self.x += v;
                     self.state = CpuState::ReadyForInstruction;
                 }
-            },
+            }
             Instruction::Noop => {
                 if self.state_cycle_count == 1 {
                     self.state = CpuState::ReadyForInstruction;
                 }
-            }, 
+            }
         }
     }
     fn give_instruction(&mut self, instruction: Instruction) {
-        assert!(self.state == CpuState::ReadyForInstruction,
-            "Should never be able to call this function with an active instruction");
+        assert!(
+            self.state == CpuState::ReadyForInstruction,
+            "Should never be able to call this function with an active instruction"
+        );
 
         self.state = CpuState::RunningInstruction(instruction);
         self.state_cycle_count = 0;
@@ -122,18 +130,19 @@ impl Cpu {
 /// The CRT displays from top to bottom, left to right.
 /// The display is 40 pixels wide and 6 pixels tall.
 /// The sprite is 3 pixels wide, and its position is the middle of those pixels.
-/// 
+///
 /// The CRT draws a single pixel (during) each cycle, left to right in scanline.
 /// A pixel is signaled "on" (lit) with the '#' character,
 /// and "off" (dark) with the '.' character.
-/// 
+///
 /// Since the CRT can only draw one pixel at a time,
 /// it will take multiple cycles to draw the full sprite.
 /// The sprite will only be fully drawn the standard way if the register does not move during drawing.
-/// 
+///
 /// SOLVE: What eight capital letters appear on the CRT?
 fn part_2_solve(input: &str) -> String {
-    let instructions: Vec<Instruction> = input.lines()
+    let instructions: Vec<Instruction> = input
+        .lines()
         .filter(|line| !line.trim().is_empty())
         .map(|line| line.parse().unwrap())
         .collect();
@@ -142,7 +151,7 @@ fn part_2_solve(input: &str) -> String {
     for instruction in instructions {
         crt.cpu.give_instruction(instruction);
         while let CpuState::RunningInstruction(_) = &crt.cpu.state {
-            let sprite_area = crt.cpu.x - 1 ..= crt.cpu.x + 1;
+            let sprite_area = crt.cpu.x - 1..=crt.cpu.x + 1;
             if sprite_area.contains(&(crt.pixel_index() as isize)) {
                 crt.draw_pixel();
             }
@@ -166,10 +175,14 @@ enum Pixel {
 }
 impl Display for Pixel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Pixel::Dark => '.',
-            Pixel::Lit => '#',
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Pixel::Dark => '.',
+                Pixel::Lit => '#',
+            }
+        )
     }
 }
 const PIXELS_IN_SCANLINE: usize = 40;
@@ -180,7 +193,7 @@ type CrtDisplay = [Scanline; SCANLINES_IN_CRT]; // 6: 0-5
 const DEFAULT_DISPLAY: CrtDisplay = [[Pixel::Dark; 40]; 6];
 struct Crt {
     display: CrtDisplay,
-    cpu: Cpu
+    cpu: Cpu,
 }
 impl Display for Crt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -225,13 +238,13 @@ mod tests {
 
     #[test]
     fn part_1_test() {
-        assert_eq!(part_1_solve(include_str!("day_10_sample_1.txt")), 13140);
+        assert_eq!(part_1_solve(include_str!("sample_1.txt")), 13140);
     }
     #[test]
     fn part_2_test() {
-        let output = part_2_solve(include_str!("day_10_sample_1.txt"));
+        let output = part_2_solve(include_str!("sample_1.txt"));
         let result: Vec<&str> = output.lines().collect();
-        let answer: Vec<&str> = include_str!("day_10_answer_2.txt").lines().collect();
+        let answer: Vec<&str> = include_str!("answer_2.txt").lines().collect();
         assert_eq!(result, answer);
     }
 }

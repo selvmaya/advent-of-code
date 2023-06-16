@@ -1,6 +1,8 @@
 use std::{env, fs};
 
 mod day_1;
+mod day_10;
+mod day_11;
 mod day_2;
 mod day_3;
 mod day_4;
@@ -9,7 +11,6 @@ mod day_6;
 mod day_7;
 mod day_8;
 mod day_9;
-mod day_10;
 
 trait Runnable {
     fn run_with_input(&self, input: String);
@@ -84,6 +85,10 @@ fn main() {
         Configuration {
             runnable: Box::new(day_10::Solution),
             number: 10,
+        },
+        Configuration {
+            runnable: Box::new(day_11::Solution),
+            number: 11,
         },
     ];
     let mut args = env::args();

@@ -235,7 +235,7 @@ fn part_2_solve(input: &str) -> usize {
             let new_head_pos = snake.pos.after_dir(&motion.dir);
             snake.move_recursive(&new_head_pos);
             println!("\n\n--- SNAKE ---\n\n{}", snake);
-            
+
             let new_positions = snake
                 .collection_recursive()
                 .iter()
@@ -244,7 +244,7 @@ fn part_2_solve(input: &str) -> usize {
             tails_positions.push(new_positions);
         }
     }
-    
+
     let mut tail_histories: Vec<Vec<&Position>> = vec![];
     for e in 0..tails_positions.first().unwrap().len() {
         let mut tail_history: Vec<&Position> = vec![];
@@ -255,11 +255,16 @@ fn part_2_solve(input: &str) -> usize {
         tail_histories.push(tail_history);
     }
 
-    for history in tail_histories {
+    for history in tail_histories.clone() {
         println!("POSITIONS: {}", history.iter().unique().count());
     }
 
-    todo!()
+    tail_histories
+        .last()
+        .expect("a last tail")
+        .iter()
+        .unique()
+        .count()
 }
 struct LinkedTail {
     pos: Position,
@@ -336,7 +341,7 @@ impl LinkedTail {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const TEST_INPUT_1: &str = include_str!("day_9_sample_1.txt");
+    const TEST_INPUT_1: &str = include_str!("sample_1.txt");
     #[test]
     fn part_1_test() {
         assert_eq!(13, part_1_solve(TEST_INPUT_1));
@@ -370,7 +375,7 @@ mod tests {
         assert!(POS_1.is_next_to(&POS_5));
     }
 
-    const TEST_INPUT_2: &str = include_str!("day_9_sample_2.txt");
+    const TEST_INPUT_2: &str = include_str!("sample_2.txt");
     #[test]
     fn part_2_test() {
         assert_eq!(36, part_2_solve(TEST_INPUT_2));
