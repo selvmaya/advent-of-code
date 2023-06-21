@@ -3,6 +3,7 @@ use std::{env, fs};
 mod day_1;
 mod day_10;
 mod day_11;
+mod day_12;
 mod day_2;
 mod day_3;
 mod day_4;
@@ -89,6 +90,10 @@ fn main() {
         Configuration {
             runnable: Box::new(day_11::Solution),
             number: 11,
+        },
+        Configuration {
+            runnable: Box::new(day_12::Solution),
+            number: 12,
         },
     ];
     let mut args = env::args();
