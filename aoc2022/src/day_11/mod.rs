@@ -21,7 +21,7 @@ impl Runnable for Solution {
 /// "monkey business" is the amount of inspected items by the two most active monkeys multiplied together.
 ///
 /// SOLVE: the level of "monkey business" after 20 rounds
-fn part_1_solve(input: &str) -> u128 {
+fn part_1_solve(input: &str) -> u64 {
     let monkeys = &mut create_monkeys(input)[..];
 
     // println!("At the start, the monkeys are holding these worry levels:");
@@ -70,7 +70,7 @@ fn part_1_solve(input: &str) -> u128 {
                 })
                 .collect();
 
-            monkeys[monkey_id].inspection.performed += monkey_ref.items.len() as u128;
+            monkeys[monkey_id].inspection.performed += monkey_ref.items.len() as u64;
             monkeys[monkey_id].items.clear();
 
             for (target_id, item) in new_items {
@@ -79,7 +79,7 @@ fn part_1_solve(input: &str) -> u128 {
         };
     }
 
-    let most_active: (u128, u128) = monkeys
+    let most_active: (u64, u64) = monkeys
         .iter()
         .map(|m| m.inspection.performed)
         .sorted()
@@ -178,11 +178,11 @@ struct Monkey {
     test: DivisibleBy,
     outcome: Outcome,
 }
-type Item = u128; // assume worry levels cannot be zero
+type Item = u64; // assume worry levels cannot be zero
 struct Inspection {
     operation: Operation,
     value: Value,
-    performed: u128,
+    performed: u64,
 }
 enum Operation {
     Multiply,
@@ -190,17 +190,18 @@ enum Operation {
 }
 enum Value {
     SelfReferential,
-    Specific(u128),
+    Specific(u64),
 }
-struct DivisibleBy(u128);
+struct DivisibleBy(u64);
 struct Outcome {
     true_target: MonkeyID,
     false_target: MonkeyID,
 }
 type MonkeyID = usize;
 
-fn part_2_solve(input: &str) -> u128 {
+fn part_2_solve(input: &str) -> u64 {
     let monkeys = &mut create_monkeys(input)[..];
+    let divisor_product = monkeys.iter().map(|m| m.test.0).product::<u64>();
 
     // println!("At the start, the monkeys are holding these worry levels:");
     // for (id, monkey) in monkeys.iter().enumerate() {
@@ -209,47 +210,50 @@ fn part_2_solve(input: &str) -> u128 {
     // println!();
 
     for _round in 1..=10000 {
-        println!("\n--- ROUND {} ---\n", _round);
+        // println!("\n--- ROUND {} ---\n", _round);
         for monkey_id in 0..monkeys.len() {
             let monkey_ref = &monkeys[monkey_id];
 
-            println!("Monkey {}:", monkey_id);
+            // println!("Monkey {}:", monkey_id);
             let new_items: Vec<(MonkeyID, Item)> = monkey_ref
                 .items
                 .iter()
                 .map(|item| {
-                    println!("  Monkey inspects an item with a worry level of {}", item);
+                    // println!("  Monkey inspects an item with a worry level of {}", item);
                     let value = match monkey_ref.inspection.value {
                         Value::SelfReferential => *item,
                         Value::Specific(value) => value,
                     };
+                    
+                    let item = item % divisor_product;
+                    
                     let post_inspection = match monkey_ref.inspection.operation {
                         Operation::Multiply => {
-                            print!("    Worry level is multiplied by ");
+                            // print!("    Worry level is multiplied by ");
                             item * value
                         }
                         Operation::Add => {
-                            print!("    Worry level increases by ");
+                            // print!("    Worry level increases by ");
                             item + value
                         }
                     };
-                    println!("{} to {}", value, post_inspection);
+                    // println!("{} to {}", value, post_inspection);
 
                     // let post_worry = post_inspection;
                     // println!("    Monkey gets bored with item. Worry level is divided by 3 to {}", post_worry);
                     let target_id = if post_inspection % monkey_ref.test.0 == 0 {
-                        println!("    Current worry level is divisible by {}.", monkey_ref.test.0);
+                        // println!("    Current worry level is divisible by {}.", monkey_ref.test.0);
                         monkey_ref.outcome.true_target
                     } else {
-                        println!("    Current worry level is not divisible by {}.", monkey_ref.test.0);
+                        // println!("    Current worry level is not divisible by {}.", monkey_ref.test.0);
                         monkey_ref.outcome.false_target
                     };
-                    println!("    Item with worry level {} is (will be) thrown to monkey {}.", post_inspection, target_id);
+                    // println!("    Item with worry level {} is (will be) thrown to monkey {}.", post_inspection, target_id);
                     (target_id, post_inspection)
                 })
                 .collect();
 
-            monkeys[monkey_id].inspection.performed += monkey_ref.items.len() as u128;
+            monkeys[monkey_id].inspection.performed += monkey_ref.items.len() as u64;
             monkeys[monkey_id].items.clear();
 
             for (target_id, item) in new_items {
@@ -258,7 +262,7 @@ fn part_2_solve(input: &str) -> u128 {
         };
     }
 
-    let most_active: (u128, u128) = monkeys
+    let most_active: (u64, u64) = monkeys
         .iter()
         .map(|m| m.inspection.performed)
         .sorted()
