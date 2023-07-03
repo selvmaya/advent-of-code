@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{cmp::Ordering, fmt::Display, str::FromStr};
 
 use itertools::Itertools;
 
@@ -35,22 +35,43 @@ fn solve_part_1(input: &str) -> usize {
 	let lines_with_specific_separator = input.lines().map(|line| line.trim()).join("\n");
 
 	let pairs_of_lines = lines_with_specific_separator.split("\n\n");
-	let pairs = pairs_of_lines.map(|pair_of_lines| {
-		println!("PAIR STR: {}", pair_of_lines.split('\n').join(", "));
-		let (left, right) = pair_of_lines
-			.split_once('\n')
-			.expect("tried creating pair from wrong split");
-		// dbg!(left, right);
-		Pair {
-			left:  left.parse().expect("left element could not be parsed"),
-			right: right.parse().expect("right element could not be parsed")
-		}
-	});
-	let right_order_pairs = pairs.filter(|pair| pair.left < pair.right);
-	right_order_pairs.count()
+	let mut index = 1;
+	let pairs: Vec<Pair> = pairs_of_lines
+		.map(|pair_of_lines| {
+			// println!("PAIR STR: '{}'", pair_of_lines.split('\n').join("', '"));
+			let (left, right) = pair_of_lines
+				.split_once('\n')
+				.expect("tried creating pair from wrong split");
+			let (left, right) = (string_without_edges(left), string_without_edges(right));
+			let new_pair = Pair {
+				index,
+				left: left.parse().expect("left element could not be parsed"),
+				right: right.parse().expect("right element could not be parsed")
+			};
+			// println!(
+			// 	"\nCompleted pair:\nLEFT - {}\nRIGHT - {}\n",
+			// 	new_pair.left, new_pair.right
+			// );
+			index += 1;
+			new_pair
+		})
+		.collect();
+
+	let right_order_pairs: Vec<Pair> = pairs
+		.into_iter()
+		.filter(|pair| pair.left < pair.right)
+		.collect();
+	right_order_pairs.into_iter().map(|pair| pair.index).sum()
+}
+fn string_without_edges(s: &str) -> &str {
+	let mut chars = s.chars();
+	chars.next();
+	chars.next_back();
+	chars.as_str()
 }
 #[derive(Debug)]
 struct Pair {
+	index: usize,
 	left:  Element,
 	right: Element
 }
@@ -59,10 +80,20 @@ enum Element {
 	Integer(usize),
 	List(Vec<Element>)
 }
+impl Display for Element {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let element_str = match self {
+			Element::Integer(i) => format!("{}", i),
+			Element::List(l) => format!("[{}]", l.iter().join(", "))
+		};
+		write!(f, "{}", element_str)
+	}
+}
 impl FromStr for Element {
 	type Err = String;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		println!("- Parsing string '{}'", s);
 		// outermost packet layer is always list,
 		// below layers will also be collected as list(s)
 		let mut elements: Vec<Element> = Vec::new();
@@ -73,37 +104,47 @@ impl FromStr for Element {
 		for c in s.chars() {
 			match c {
 				'[' => {
+					if nesting_depth > 0 {
+						sub_chars.push('[');
+					}
 					// go below
 					nesting_depth += 1;
+					println!("> Increased nesting depth to {}", nesting_depth);
 				},
 				']' => {
 					if nesting_depth == 0 {
-						break; // assume that this will only happen at the end
+						assert!(sub_chars.is_empty());
+						// assume that this will only happen at the end (early return)
+						break;
 					}
-					// go back up
+					// go back up recursive stack
 					nesting_depth -= 1;
-					if nesting_depth == 0 {
-						assert!(!sub_chars.is_empty());
+					if nesting_depth > 0 {
+						sub_chars.push(']');
+					}
+					if nesting_depth == 0 && !sub_chars.is_empty() {
 						// get result of substring
 						elements.push(sub_chars.iter().collect::<String>().parse::<Element>()?);
 						sub_chars.clear();
 					}
 				},
 				',' => {
-					assert!(
-						!surface_integer_chars.is_empty(),
-						"assume integer split has element before this point"
-					);
 					if nesting_depth > 0 {
 						sub_chars.push(',')
-					} else {
-						elements.push(Element::Integer(
+					} else if !surface_integer_chars.is_empty() {
+						let new_integer = Element::Integer(
 							surface_integer_chars
 								.iter()
 								.collect::<String>()
 								.parse::<usize>()
 								.map_err(|_| "Could not parse integer?".to_string())?
-						));
+						);
+						println!(
+							"Adding integer {} to list [{}]...",
+							new_integer,
+							elements.iter().join(", ")
+						);
+						elements.push(new_integer);
 						surface_integer_chars.clear();
 					}
 				},
@@ -117,12 +158,30 @@ impl FromStr for Element {
 				}
 			}
 		}
-		Ok(Element::List(elements))
+		if !surface_integer_chars.is_empty() {
+			let new_integer = Element::Integer(
+				surface_integer_chars
+					.iter()
+					.collect::<String>()
+					.parse::<usize>()
+					.map_err(|_| "Could not parse integer?".to_string())?
+			);
+			println!(
+				"Adding integer {} to list [{}]...",
+				new_integer,
+				elements.iter().join(", ")
+			);
+			elements.push(new_integer);
+		}
+		let elements = Element::List(elements);
+		println!("; Parsed elements: {}", elements);
+		Ok(elements)
 	}
 }
 impl PartialOrd for Element {
 	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-		match (self, other) {
+		println!("Comparing self '{}' with other '{}'", self, other);
+		let result = match (self, other) {
 			// different comparison (convert before new compare)
 			(Self::Integer(self_int), Self::List(_)) => {
 				Self::List(vec![Self::Integer(*self_int)]).partial_cmp(other)
@@ -133,9 +192,28 @@ impl PartialOrd for Element {
 			// similar comparison
 			(Self::Integer(self_int), Self::Integer(other_int)) => self_int.partial_cmp(other_int),
 			(Self::List(self_list), Self::List(other_list)) => {
-				self_list.len().partial_cmp(&other_list.len())
-			},
-		}
+				let mut ordering = self_list.len().partial_cmp(&other_list.len());
+				let smallest_len = self_list.len().min(other_list.len());
+				for i in 0..smallest_len {
+					let self_element = &self_list[i];
+					let other_element = &other_list[i];
+					match self_element.partial_cmp(other_element) {
+						Some(Ordering::Equal) => {},
+						alt => {
+							println!(
+								"Compared {} with {} and found ordering {:?}",
+								self_element, other_element, alt
+							);
+							ordering = alt;
+							break;
+						}
+					}
+				}
+				ordering
+			}
+		};
+		println!("Result from comparison: {:?}\n", result);
+		result
 	}
 }
 
