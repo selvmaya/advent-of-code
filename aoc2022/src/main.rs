@@ -23,12 +23,11 @@ struct Configuration {
 }
 impl Configuration {
 	fn run(&self, should_run_test: bool) {
-		self.run_with_input(match should_run_test {
-			true => self
-				.get_test_input_from_number()
-				.unwrap_or_else(|_| panic!("*TEST* input missing for day {}", self.number)),
-			false => self
-				.get_input_from_number()
+		self.run_with_input(if should_run_test {
+			self.get_test_input_from_number()
+				.unwrap_or_else(|_| panic!("*TEST* input missing for day {}", self.number))
+		} else {
+			self.get_input_from_number()
 				.unwrap_or_else(|_| panic!("Input missing for day {}", self.number))
 		})
 	}
