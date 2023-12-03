@@ -28,8 +28,8 @@ pub(crate) fn part_1(input: &str) -> String {
                 .collect::<String>()
                 .split_whitespace()
                 .flat_map(|number| {
-                    line.match_indices(number)
-                        .map(|(x, _)| ((x, y), number.parse::<u32>().unwrap()))
+                    let num = number.parse::<u32>().unwrap();
+                    line.match_indices(number).map(move |(x, _)| ((x, y), num))
                 })
                 .collect::<Vec<_>>()
                 .into_iter()
