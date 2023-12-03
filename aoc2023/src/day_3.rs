@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use std::cmp::max;
-use std::collections::HashMap;
 
 // Investigate schematic (laid out in ascii grid).
 // Find every symbol coordinate, find every number with coordinate, then filter out every number whose coordinate is not close enough to a symbol.
@@ -28,32 +27,28 @@ pub(crate) fn part_1(input: &str) -> String {
                 .map(|c| if !c.is_ascii_digit() { ' ' } else { c }) // keep only the numbers (still in place)
                 .collect::<String>()
                 .split_whitespace()
-                .map(|number| {
-                    (
-                        number.parse::<u32>().unwrap(),
-                        line.match_indices(number).map(|(x, _)| (x, y)).collect(),
-                    )
+                .flat_map(|number| {
+                    line.match_indices(number)
+                        .map(|(x, _)| ((x, y), number.parse::<u32>().unwrap()))
                 })
-                .collect::<HashMap<_, _>>()
+                .collect::<Vec<_>>()
                 .into_iter()
         })
-        .collect::<HashMap<u32, Vec<(usize, usize)>>>();
+        .collect::<Vec<((usize, usize), u32)>>();
     // dbg!(numbers);
     numbers
         .iter()
-        .filter(|(number, positions)| {
-            positions.iter().any(|(x, y)| {
-                // dbg!(x, y, number);
-                let search_horizontal =
-                    (x.saturating_sub(1))..=(x + number.to_string().chars().count());
-                let search_vertical = (y.saturating_sub(1))..=(y + 1);
-                // dbg!(&search_horizontal, &search_vertical);
-                symbols.iter().any(|(symbol_x, symbol_y)| {
-                    search_horizontal.contains(symbol_x) && search_vertical.contains(symbol_y)
-                })
+        .filter(|((x, y), number)| {
+            // dbg!(x, y, number);
+            let search_horizontal =
+                (x.saturating_sub(1))..=(x + number.to_string().chars().count());
+            let search_vertical = (y.saturating_sub(1))..=(y + 1);
+            // dbg!(&search_horizontal, &search_vertical);
+            symbols.iter().any(|(symbol_x, symbol_y)| {
+                search_horizontal.contains(symbol_x) && search_vertical.contains(symbol_y)
             })
         })
-        .map(|(number, _)| number)
+        .map(|((_, _), number)| number)
         .sum::<u32>()
         .to_string()
 }
