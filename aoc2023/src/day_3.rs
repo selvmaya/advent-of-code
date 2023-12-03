@@ -3,7 +3,7 @@ use std::cmp::max;
 use std::collections::HashMap;
 
 // Investigate schematic (laid out in ascii grid).
-// Find every symbol coordinate, find every number with coordinate, then filter out every number whos coordinate is not close enough to a symbol.
+// Find every symbol coordinate, find every number with coordinate, then filter out every number whose coordinate is not close enough to a symbol.
 pub(crate) fn part_1(input: &str) -> String {
     let symbols = input
         .lines()
