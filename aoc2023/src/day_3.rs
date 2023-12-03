@@ -24,7 +24,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .enumerate()
         .flat_map(|(y, line)| {
             line.chars()
-                .map(|c| if !c.is_ascii_digit() { ' ' } else { c })
+                .map(|c| if !c.is_ascii_digit() { ' ' } else { c }) // keep only the numbers (still in place)
                 .collect::<String>()
                 .split_whitespace()
                 .flat_map(|number| {
@@ -41,7 +41,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .filter(|((x, y), number)| {
             // dbg!(x, y, number);
             let search_horizontal =
-                (x.saturating_sub(1))..=(x + (number.to_string().chars().count()));
+                (x.saturating_sub(1))..=(x + number.to_string().chars().count());
             let search_vertical = (y.saturating_sub(1))..=(y + 1);
             // dbg!(&search_horizontal, &search_vertical);
             symbols.iter().any(|(symbol_x, symbol_y)| {
