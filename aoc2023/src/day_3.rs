@@ -17,7 +17,7 @@ pub(crate) fn part_1(input: &str) -> String {
             })
         })
         .collect::<Vec<(usize, usize)>>();
-    dbg!(&symbols);
+    // dbg!(&symbols);
 
     let numbers = input
         .lines()
@@ -27,11 +27,9 @@ pub(crate) fn part_1(input: &str) -> String {
                 .map(|c| if !c.is_ascii_digit() { ' ' } else { c })
                 .collect::<String>()
                 .split_whitespace()
-                .map(move |number| {
-                    (
-                        (line.find(number).unwrap(), y),
-                        number.parse::<u32>().unwrap(),
-                    )
+                .flat_map(|number| {
+                    line.match_indices(number)
+                        .map(|(x, _)| ((x, y), number.parse::<u32>().unwrap()))
                 })
                 .collect::<Vec<_>>()
                 .into_iter()
