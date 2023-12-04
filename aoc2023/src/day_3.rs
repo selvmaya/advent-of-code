@@ -127,12 +127,12 @@ pub(crate) fn part_1(input: &str) -> String {
     part_1_numbers(input).into_iter().sum::<u32>().to_string()
 }
 fn part_1_numbers(input: &str) -> Vec<u32> {
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct Number {
         value: u32,
         area: Area, // includes position data
     }
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct Area {
         horizontal: RangeInclusive<usize>,
         vertical: RangeInclusive<usize>,
@@ -141,6 +141,24 @@ fn part_1_numbers(input: &str) -> Vec<u32> {
         fn contains(&self, x: &usize, y: &usize) -> bool {
             self.horizontal.contains(x) && self.vertical.contains(y)
         }
+        fn horizontally_contains(&self, other: &Area) -> bool {
+            self.horizontal.start() <= other.horizontal.start()
+                && self.horizontal.end() >= other.horizontal.end()
+        }
+        // fn line_intersection(&self, other: &Area) -> bool {
+        //     (self
+        //         .horizontal
+        //         .contains(&other.horizontal.start().saturating_add(1))
+        //         || self
+        //             .horizontal
+        //             .contains(&other.horizontal.end().saturating_sub(1))
+        //         || other
+        //             .horizontal
+        //             .contains(&self.horizontal.start().saturating_add(1))
+        //         || other
+        //             .horizontal
+        //             .contains(&self.horizontal.end().saturating_sub(1)))
+        // }
     }
 
     let symbols = input
@@ -162,7 +180,7 @@ fn part_1_numbers(input: &str) -> Vec<u32> {
                 .chars()
                 .map(|c| if c.is_ascii_digit() { c } else { ' ' })
                 .collect::<String>();
-            line_with_numbers
+            let all_substring_matches = line_with_numbers
                 .split_ascii_whitespace()
                 .unique()
                 .flat_map(|digits| {
@@ -175,6 +193,20 @@ fn part_1_numbers(input: &str) -> Vec<u32> {
                         },
                     })
                 })
+                .collect::<Vec<_>>();
+            all_substring_matches
+                .iter()
+                .filter(|num| {
+                    // filter out numbers found in line that are a subsequence of another
+                    !all_substring_matches.iter().any(|other_num| {
+                        let other_string = other_num.value.to_string();
+                        let self_string = num.value.to_string();
+                        other_string.chars().count() > self_string.chars().count()
+                            && other_string.contains(&self_string)
+                            && other_num.area.horizontally_contains(&num.area)
+                    })
+                })
+                .cloned()
                 .collect::<Vec<_>>()
                 .into_iter()
         })
