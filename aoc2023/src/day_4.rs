@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 pub(crate) fn part_1(input: &str) -> String {
     input
         .lines()
@@ -29,7 +31,61 @@ pub(crate) fn part_1(input: &str) -> String {
 }
 
 pub(crate) fn part_2(input: &str) -> String {
-    todo!()
+    struct ScratchCardInfo {
+        _label: usize,
+        winning: Vec<u32>,
+        owned: Vec<u32>,
+    }
+    // parse
+    let cards = input
+        .lines()
+        .map(|line| {
+            let (card_info, data) = line.split_once(": ").unwrap();
+            let (_, label) = card_info.split_ascii_whitespace().collect_tuple().unwrap();
+            let (winning, owned) = data.split_once(" | ").unwrap();
+            let (winning, owned) = (
+                winning
+                    .split_ascii_whitespace()
+                    .map(|num| num.parse::<u32>().unwrap())
+                    .collect::<Vec<_>>(),
+                owned
+                    .split_ascii_whitespace()
+                    .map(|num| num.parse::<u32>().unwrap())
+                    .collect::<Vec<_>>(),
+            );
+            ScratchCardInfo {
+                _label: label.parse().unwrap(),
+                winning,
+                owned,
+            }
+        })
+        .collect::<Vec<ScratchCardInfo>>();
+
+    let mut scratchcards_total = 0u32; // originals counted by appearance in loop
+                                       // find copies
+    let mut card_amount_stack = vec![1u32; cards.len()];
+    for card in cards {
+        // dbg!(&card_amount_stack);
+        let card_amount = card_amount_stack.pop().unwrap();
+        scratchcards_total += card_amount;
+        let winnings = card
+            .owned
+            .iter()
+            .filter(|num| card.winning.contains(num))
+            .count();
+        if winnings > 0 {
+            // necessary to keep away underflow of last_index on last card
+            let last_index = card_amount_stack.len() - 1;
+            // dbg!(card._label, scratchcards_total, winnings, last_index);
+            for ahead_index in 0..winnings {
+                let stack_index = last_index - ahead_index;
+                card_amount_stack[stack_index] += card_amount;
+                // eprintln!("added {} to index {}", card_amount, stack_index);
+            }
+        }
+    }
+
+    scratchcards_total.to_string()
 }
 
 #[cfg(test)]
@@ -49,9 +105,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
     }
 
     #[test]
-    #[ignore]
     fn part_2_works() {
-        todo!();
-        assert_eq!(part_2(TEST_INPUT), "");
+        assert_eq!(part_2(TEST_INPUT), "30");
     }
 }
