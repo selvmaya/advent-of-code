@@ -1,54 +1,64 @@
 use itertools::Itertools;
 use std::cmp::max;
+use std::collections::{BTreeMap, HashSet};
+use std::ops::RangeInclusive;
 
-// Investigate schematic (laid out in ascii grid).
-// Find every symbol coordinate, find every number with coordinate, then filter out every number whose coordinate is not close enough to a symbol.
 pub(crate) fn part_1(input: &str) -> String {
+    #[derive(Debug)]
+    struct Area {
+        horizontal: RangeInclusive<usize>,
+        vertical: RangeInclusive<usize>,
+    }
+    impl Area {
+        fn contains(&self, x: &usize, y: &usize) -> bool {
+            self.horizontal.contains(x) && self.vertical.contains(y)
+        }
+    }
+    #[derive(Debug)]
+    struct Number {
+        value: u32,
+        area: Area, // includes position data
+    }
+
     let symbols = input
         .lines()
         .enumerate()
         .flat_map(|(y, line)| {
-            line.trim().chars().enumerate().filter_map(move |(x, c)| {
-                if !c.is_ascii_digit() && c != '.' {
-                    Some((x, y))
-                } else {
-                    None
-                }
-            })
+            line.chars()
+                .enumerate()
+                .filter(|(_x, c)| !c.is_ascii_digit() && *c != '.')
+                .map(move |(x, _c)| (x, y))
         })
-        .collect::<Vec<(usize, usize)>>();
-    // dbg!(&symbols);
+        .collect::<Vec<_>>();
 
-    let numbers = input
+    input
         .lines()
         .enumerate()
         .flat_map(|(y, line)| {
-            line.chars()
-                .map(|c| if !c.is_ascii_digit() { ' ' } else { c }) // keep only the numbers (still in place)
-                .collect::<String>()
-                .split_whitespace()
-                .flat_map(|number| {
-                    let num = number.parse::<u32>().unwrap();
-                    line.match_indices(number).map(move |(x, _)| ((x, y), num))
+            let line_with_numbers = line
+                .chars()
+                .map(|c| if c.is_ascii_digit() { c } else { ' ' })
+                .collect::<String>();
+            line_with_numbers
+                .split_ascii_whitespace()
+                .unique()
+                .flat_map(|digits| {
+                    line.match_indices(digits).map(|(x, number)| Number {
+                        value: number.parse().expect("is parsable number"),
+                        area: Area {
+                            horizontal: (x.saturating_sub(1))
+                                ..=(x.saturating_add(number.chars().count())),
+                            vertical: (y.saturating_sub(1))..=(y.saturating_add(1)),
+                        },
+                    })
                 })
                 .collect::<Vec<_>>()
                 .into_iter()
         })
-        .collect::<Vec<((usize, usize), u32)>>();
-    // dbg!(numbers);
-    numbers
-        .iter()
-        .filter(|((x, y), number)| {
-            // dbg!(x, y, number);
-            let search_horizontal =
-                (x.saturating_sub(1))..=(x + number.to_string().chars().count());
-            let search_vertical = (y.saturating_sub(1))..=(y + 1);
-            // dbg!(&search_horizontal, &search_vertical);
-            symbols.iter().any(|(symbol_x, symbol_y)| {
-                search_horizontal.contains(symbol_x) && search_vertical.contains(symbol_y)
-            })
-        })
-        .map(|((_, _), number)| number)
+        .collect::<Vec<Number>>()
+        .into_iter()
+        .filter(|number| symbols.iter().any(|(x, y)| number.area.contains(x, y)))
+        .map(|number| number.value)
         .sum::<u32>()
         .to_string()
 }
