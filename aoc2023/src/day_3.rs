@@ -1,7 +1,114 @@
 use itertools::Itertools;
+use regex::Regex;
 use std::cmp::max;
 use std::collections::{BTreeMap, HashSet};
-use std::ops::RangeInclusive;
+use std::ops::{Add, RangeInclusive};
+
+/// below is a crude repackaging of Niashi24's solution,
+/// from https://github.com/Niashi24/aoc2023/blob/master/src/day3.rs,
+/// in an attempt to find *where* in my own solution I am letting a wrong a part number through.
+#[derive(Copy, Clone, Hash, PartialEq, Eq, Debug)]
+pub struct V2I {
+    pub x: i32,
+    pub y: i32,
+}
+impl V2I {
+    pub fn new(x: i32, y: i32) -> V2I {
+        V2I { x, y }
+    }
+}
+impl Add for V2I {
+    type Output = V2I;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::Output {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+pub struct Info {
+    numbers: Vec<Number>,
+    symbols: Vec<(char, V2I)>,
+}
+pub struct Number {
+    value: i64,
+    positions: Vec<V2I>,
+}
+impl Info {
+    fn parse_file(input: String) -> Info {
+        let syms = input
+            .lines()
+            .enumerate()
+            .flat_map(|(row, line)| {
+                let row = row as i32;
+                line.chars()
+                    .enumerate()
+                    .filter(|(_, c)| !c.is_numeric() && c != &'.')
+                    .map(move |(col, c)| (c, V2I::new(col as i32, row)))
+            })
+            .collect();
+
+        // #[cfg(windows)]
+        // const LINE_ENDING: &str = "\r\n";
+        // #[cfg(not(windows))]
+        const LINE_ENDING: &str = "\n";
+
+        let num_regex = Regex::new(r"(\d+)").unwrap();
+        let width = input.lines().next().unwrap().chars().count() + LINE_ENDING.len();
+        // dbg!(width);
+        let nums = num_regex
+            .captures_iter(&input)
+            .map(|m| {
+                let m = m.get(0).unwrap();
+                let (y, x) = (m.start() / width, m.start() % width);
+                // println!("({}, {})", x, y);
+                Number {
+                    value: m.as_str().parse().unwrap(),
+                    positions: (0..m.len())
+                        .map(|dx| V2I::new((x + dx) as i32, y as i32))
+                        .collect(),
+                }
+            })
+            .collect();
+        Info {
+            numbers: nums,
+            symbols: syms,
+        }
+    }
+
+    #[inline]
+    fn near(a: &V2I, b: &V2I) -> bool {
+        (a.x - b.x).abs() <= 1 && (a.y - b.y).abs() <= 1
+    }
+
+    fn part_1(&self) -> i64 {
+        // Hashmap solution: O(s + n)
+        let mut filled = HashSet::<V2I>::new();
+        self.symbols.iter().for_each(|(_, p)| {
+            for y in [-1, 0, 1] {
+                for x in [-1, 0, 1] {
+                    filled.insert(V2I::new(x + p.x, y + p.y));
+                }
+            }
+        });
+        // self.numbers
+        //     .iter()
+        //     .filter(|x| x.positions.iter().any(|x| filled.contains(x)))
+        //     .map(|x| x.value)
+        //     .sum()
+        // Naive solution: O(s * n)
+        self.numbers
+            .iter()
+            .filter(|x| {
+                x.positions
+                    .iter()
+                    .any(|x| self.symbols.iter().any(|(_, p)| Self::near(x, p)))
+            })
+            .map(|x| x.value)
+            .sum()
+    }
+}
 
 pub(crate) fn part_1(input: &str) -> String {
     #[derive(Debug)]
@@ -70,6 +177,7 @@ pub(crate) fn part_1(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use crate::day_3::*;
+    use std::fs;
 
     #[test]
     fn part_1_works() {
@@ -90,6 +198,14 @@ mod tests {
         );
     }
 
+    #[test]
+    fn solution_matches_answer() {
+        let input = fs::read_to_string("input/day_3.txt").unwrap();
+        assert_eq!(
+            part_1(input.as_str()),
+            Info::parse_file(input).part_1().to_string()
+        );
+    }
     // #[test]
     // fn part_2_works() {
     //     assert_eq!(part_2(""), "");
