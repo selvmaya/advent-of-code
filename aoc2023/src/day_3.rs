@@ -7,110 +7,126 @@ use std::ops::{Add, RangeInclusive};
 /// below is a crude repackaging of Niashi24's solution,
 /// from https://github.com/Niashi24/aoc2023/blob/master/src/day3.rs,
 /// in an attempt to find *where* in my own solution I am letting a wrong a part number through.
-#[derive(Copy, Clone, Hash, PartialEq, Eq, Debug)]
-pub struct V2I {
-    pub x: i32,
-    pub y: i32,
-}
-impl V2I {
-    pub fn new(x: i32, y: i32) -> V2I {
-        V2I { x, y }
-    }
-}
-impl Add for V2I {
-    type Output = V2I;
+mod imported {
+    use regex::Regex;
+    use std::collections::HashSet;
+    use std::ops::Add;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        Self::Output {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
+    #[derive(Copy, Clone, Hash, PartialEq, Eq, Debug)]
+    pub struct V2I {
+        pub x: i32,
+        pub y: i32,
+    }
+    impl V2I {
+        pub fn new(x: i32, y: i32) -> V2I {
+            V2I { x, y }
         }
     }
-}
-pub struct Info {
-    numbers: Vec<Number>,
-    symbols: Vec<(char, V2I)>,
-}
-pub struct Number {
-    value: i64,
-    positions: Vec<V2I>,
-}
-impl Info {
-    fn parse_file(input: String) -> Info {
-        let syms = input
-            .lines()
-            .enumerate()
-            .flat_map(|(row, line)| {
-                let row = row as i32;
-                line.chars()
-                    .enumerate()
-                    .filter(|(_, c)| !c.is_numeric() && c != &'.')
-                    .map(move |(col, c)| (c, V2I::new(col as i32, row)))
-            })
-            .collect();
+    impl Add for V2I {
+        type Output = V2I;
 
-        // #[cfg(windows)]
-        // const LINE_ENDING: &str = "\r\n";
-        // #[cfg(not(windows))]
-        const LINE_ENDING: &str = "\n";
-
-        let num_regex = Regex::new(r"(\d+)").unwrap();
-        let width = input.lines().next().unwrap().chars().count() + LINE_ENDING.len();
-        // dbg!(width);
-        let nums = num_regex
-            .captures_iter(&input)
-            .map(|m| {
-                let m = m.get(0).unwrap();
-                let (y, x) = (m.start() / width, m.start() % width);
-                // println!("({}, {})", x, y);
-                Number {
-                    value: m.as_str().parse().unwrap(),
-                    positions: (0..m.len())
-                        .map(|dx| V2I::new((x + dx) as i32, y as i32))
-                        .collect(),
-                }
-            })
-            .collect();
-        Info {
-            numbers: nums,
-            symbols: syms,
-        }
-    }
-
-    #[inline]
-    fn near(a: &V2I, b: &V2I) -> bool {
-        (a.x - b.x).abs() <= 1 && (a.y - b.y).abs() <= 1
-    }
-
-    fn part_1(&self) -> i64 {
-        // Hashmap solution: O(s + n)
-        let mut filled = HashSet::<V2I>::new();
-        self.symbols.iter().for_each(|(_, p)| {
-            for y in [-1, 0, 1] {
-                for x in [-1, 0, 1] {
-                    filled.insert(V2I::new(x + p.x, y + p.y));
-                }
+        fn add(self, rhs: Self) -> Self::Output {
+            Self::Output {
+                x: self.x + rhs.x,
+                y: self.y + rhs.y,
             }
-        });
-        // self.numbers
-        //     .iter()
-        //     .filter(|x| x.positions.iter().any(|x| filled.contains(x)))
-        //     .map(|x| x.value)
-        //     .sum()
-        // Naive solution: O(s * n)
-        self.numbers
-            .iter()
-            .filter(|x| {
-                x.positions
-                    .iter()
-                    .any(|x| self.symbols.iter().any(|(_, p)| Self::near(x, p)))
-            })
-            .map(|x| x.value)
-            .sum()
+        }
+    }
+    pub struct Info {
+        numbers: Vec<Number>,
+        symbols: Vec<(char, V2I)>,
+    }
+    pub struct Number {
+        value: u32,
+        positions: Vec<V2I>,
+    }
+    impl Info {
+        pub(crate) fn parse_file(input: String) -> Info {
+            let syms = input
+                .lines()
+                .enumerate()
+                .flat_map(|(row, line)| {
+                    let row = row as i32;
+                    line.chars()
+                        .enumerate()
+                        .filter(|(_, c)| !c.is_numeric() && c != &'.')
+                        .map(move |(col, c)| (c, V2I::new(col as i32, row)))
+                })
+                .collect();
+
+            // #[cfg(windows)]
+            // const LINE_ENDING: &str = "\r\n";
+            // #[cfg(not(windows))]
+            const LINE_ENDING: &str = "\n";
+
+            let num_regex = Regex::new(r"(\d+)").unwrap();
+            let width = input.lines().next().unwrap().chars().count() + LINE_ENDING.len();
+            // dbg!(width);
+            let nums = num_regex
+                .captures_iter(&input)
+                .map(|m| {
+                    let m = m.get(0).unwrap();
+                    let (y, x) = (m.start() / width, m.start() % width);
+                    // println!("({}, {})", x, y);
+                    Number {
+                        value: m.as_str().parse().unwrap(),
+                        positions: (0..m.len())
+                            .map(|dx| V2I::new((x + dx) as i32, y as i32))
+                            .collect(),
+                    }
+                })
+                .collect();
+            Info {
+                numbers: nums,
+                symbols: syms,
+            }
+        }
+
+        #[inline]
+        fn near(a: &V2I, b: &V2I) -> bool {
+            (a.x - b.x).abs() <= 1 && (a.y - b.y).abs() <= 1
+        }
+
+        pub(crate) fn part_1(&self) -> u32 {
+            self.part_1_numbers().into_iter().sum()
+        }
+        pub(crate) fn part_1_numbers(&self) -> Vec<u32> {
+            // Hashmap solution: O(s + n)
+            let mut filled = HashSet::<V2I>::new();
+            self.symbols.iter().for_each(|(_, p)| {
+                for y in [-1, 0, 1] {
+                    for x in [-1, 0, 1] {
+                        filled.insert(V2I::new(x + p.x, y + p.y));
+                    }
+                }
+            });
+            self.numbers
+                .iter()
+                .filter(|x| x.positions.iter().any(|x| filled.contains(x)))
+                .map(|x| x.value)
+                // Naive solution: O(s * n)
+                // self.numbers
+                //     .iter()
+                //     .filter(|x| {
+                //         x.positions
+                //             .iter()
+                //             .any(|x| self.symbols.iter().any(|(_, p)| Self::near(x, p)))
+                //     })
+                //     .map(|x| x.value)
+                .collect::<Vec<_>>()
+        }
     }
 }
 
 pub(crate) fn part_1(input: &str) -> String {
+    part_1_numbers(input).into_iter().sum::<u32>().to_string()
+}
+fn part_1_numbers(input: &str) -> Vec<u32> {
+    #[derive(Debug)]
+    struct Number {
+        value: u32,
+        area: Area, // includes position data
+    }
     #[derive(Debug)]
     struct Area {
         horizontal: RangeInclusive<usize>,
@@ -120,11 +136,6 @@ pub(crate) fn part_1(input: &str) -> String {
         fn contains(&self, x: &usize, y: &usize) -> bool {
             self.horizontal.contains(x) && self.vertical.contains(y)
         }
-    }
-    #[derive(Debug)]
-    struct Number {
-        value: u32,
-        area: Area, // includes position data
     }
 
     let symbols = input
@@ -137,7 +148,7 @@ pub(crate) fn part_1(input: &str) -> String {
                 .map(move |(x, _c)| (x, y))
         })
         .collect::<Vec<_>>();
-
+    eprintln!("VALUES AS ATTEMPTED:");
     input
         .lines()
         .enumerate()
@@ -166,8 +177,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .into_iter()
         .filter(|number| symbols.iter().any(|(x, y)| number.area.contains(x, y)))
         .map(|number| number.value)
-        .sum::<u32>()
-        .to_string()
+        .collect()
 }
 
 // pub(crate) fn part_2(input: &str) -> String {
@@ -176,7 +186,10 @@ pub(crate) fn part_1(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use crate::day_3::imported::Info;
     use crate::day_3::*;
+    use std::collections::btree_map::Entry;
+    use std::collections::HashMap;
     use std::fs;
 
     #[test]
@@ -203,9 +216,40 @@ mod tests {
         let input = fs::read_to_string("input/day_3.txt").unwrap();
         assert_eq!(
             part_1(input.as_str()),
-            Info::parse_file(input).part_1().to_string()
+            imported::Info::parse_file(input).part_1().to_string()
         );
     }
+
+    #[test]
+    fn numbers_match_up() {
+        let input = fs::read_to_string("input/day_3.txt").unwrap();
+        let own =
+            part_1_numbers(input.as_str())
+                .into_iter()
+                .fold(BTreeMap::new(), |mut acc, val| {
+                    *acc.entry(val).or_insert(0) += 1;
+                    acc
+                });
+        let other = Info::parse_file(input).part_1_numbers().into_iter().fold(
+            BTreeMap::new(),
+            |mut acc, val| {
+                *acc.entry(val).or_insert(0) += 1;
+                acc
+            },
+        );
+        let mut different: BTreeMap<u32, i32> = BTreeMap::new();
+        for (val, amount) in own {
+            if let Some(other_amount) = other.get(&val) {
+                if *other_amount != amount {
+                    assert!(different.insert(val, amount - other_amount).is_none());
+                }
+            } else {
+                assert!(different.insert(val, amount).is_none());
+            }
+        }
+        assert_eq!(different, BTreeMap::new());
+    }
+
     // #[test]
     // fn part_2_works() {
     //     assert_eq!(part_2(""), "");
