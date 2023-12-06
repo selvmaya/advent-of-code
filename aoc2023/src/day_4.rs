@@ -62,7 +62,6 @@ pub(crate) fn part_2(input: &str) -> String {
         .collect::<Vec<ScratchCardInfo>>();
 
     let mut scratchcards_total = 0u32; // originals counted by appearance in loop
-                                       // find copies
     let mut card_amount_stack = vec![1u32; cards.len()];
     for card in cards {
         // dbg!(&card_amount_stack);
