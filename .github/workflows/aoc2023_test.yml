@@ -1,4 +1,4 @@
-name: Rust
+name: aoc2023 tests
 
 on:
   push:
@@ -9,11 +9,9 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-    - working-directory: ./aoc2023
     - name: Run tests
+      working-directory: ./aoc2023
       run: cargo test --verbose
