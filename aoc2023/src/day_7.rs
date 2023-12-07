@@ -283,12 +283,12 @@ QQQJA 1";
         use super::*;
 
         #[test]
-        #[cfg_attr(not(feature = "regression"), ignore)]
+        // #[cfg_attr(feature = "regression", ignore)]
+        // #[ignore]
         fn not_previously_encountered() {
-            assert_ne!(
-                part_1(std::fs::read_to_string("input/day_7.txt").unwrap().as_str()),
-                "250400505"
-            );
+            let output = part_1(std::fs::read_to_string("input/day_7.txt").unwrap().as_str());
+            assert_ne!(output, "250400505");
+            assert_ne!(output, "33518063");
         }
     }
 
