@@ -44,9 +44,9 @@ pub(crate) fn part_2(input: &str) -> String {
                     last = last_spelled;
                 }
             }
-            let line_sum = (first.unwrap().1 * 10) + last.unwrap().1; // first is 2nd decimal place or whatever
-                                                                      // eprintln!("Line sum: {}", line_sum);
-            line_sum
+            // first is 2nd decimal place or whatever
+            // eprintln!("Line sum: {}", line_sum);
+            (first.unwrap().1 * 10) + last.unwrap().1
         })
         .sum::<u32>()
         .to_string()

@@ -6,6 +6,7 @@ mod day_3;
 mod day_4;
 mod day_5;
 mod day_6;
+mod day_7;
 
 fn main() {
     // let day_input = std::fs::read_to_string("input/day_1.txt").unwrap();
@@ -23,7 +24,10 @@ fn main() {
     // let day_input = std::fs::read_to_string("input/day_5.txt").unwrap();
     // println!("{}", day_5::part_1(&day_input));
     // println!("{}", day_5::part_2(&day_input));
-    let day_input = std::fs::read_to_string("input/day_6.txt").unwrap();
+    // let day_input = std::fs::read_to_string("input/day_6.txt").unwrap();
     // println!("{}", day_6::part_1(&day_input));
-    println!("{}", day_6::part_2(&day_input));
+    // println!("{}", day_6::part_2(&day_input));
+    let day_input = std::fs::read_to_string("input/day_7.txt").unwrap();
+    println!("{}", day_7::part_1(&day_input));
+    // println!("{}", day_7::part_2(&day_input));
 }
