@@ -395,8 +395,7 @@ mod part_2 {
             .sorted_by(|(a_hand, _), (b_hand, _)| {
                 // eprint!("Comparing {:?} with {:?}: ", a_hand, b_hand);
                 a_hand.cmp(b_hand)
-            }) // note: group_by is consecutive
-            .inspect(|(hand, _bid)| eprintln!("Hand: {:?}", hand))
+            })
             .enumerate() // defines strength by iteration order of BTreeMap
             .map(|(index, (_hand, bid))| (index as Number + 1) * bid)
             .sum::<Number>()
