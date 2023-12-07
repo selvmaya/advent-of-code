@@ -28,6 +28,6 @@ fn main() {
     // println!("{}", day_6::part_1(&day_input));
     // println!("{}", day_6::part_2(&day_input));
     let day_input = std::fs::read_to_string("input/day_7.txt").unwrap();
-    println!("{}", day_7::part_1(&day_input));
-    // println!("{}", day_7::part_2(&day_input));
+    // println!("{}", day_7::part_1(&day_input));
+    println!("{}", day_7::part_2(&day_input));
 }
