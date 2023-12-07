@@ -354,7 +354,7 @@ mod part_2 {
     impl Ord for Hand {
         fn cmp(&self, other: &Self) -> Ordering {
             match Ranking::from(self).cmp(&Ranking::from(other)) {
-                Ordering::Equal => self.0.cmp(&other.0), // assume this is correct?
+                Ordering::Equal => self.0.cmp(&other.0),
                 order => order,
             }
         }
