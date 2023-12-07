@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
     - name: Run tests
       working-directory: ./aoc2023
       run: cargo test --verbose
