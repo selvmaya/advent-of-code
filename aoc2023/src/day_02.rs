@@ -1,4 +1,7 @@
+use crate::SolverFn;
 use std::cmp::max;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
 
 // Of all games (input), which ones are possible with specific constraints?
 struct CubeAmount {
@@ -6,7 +9,7 @@ struct CubeAmount {
     green: u32,
     blue: u32,
 }
-pub(crate) fn part_1(input: &str) -> String {
+fn part_1(input: &str) -> String {
     const UPPER_LIMIT: CubeAmount = CubeAmount {
         red: 12,
         green: 13,
@@ -46,7 +49,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .to_string()
 }
 
-pub(crate) fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> String {
     const UPPER_LIMIT: CubeAmount = CubeAmount {
         red: 12,
         green: 13,
@@ -81,7 +84,7 @@ pub(crate) fn part_2(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::day_2::*;
+    use crate::day_02::*;
 
     #[test]
     fn part_1_works() {

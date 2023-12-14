@@ -1,5 +1,10 @@
-// take each line, add first and last digit in it, then sum them together.
-pub(crate) fn part_1(input: &str) -> String {
+use crate::SolverFn;
+use std::fmt::Display;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
+
+/// Take each line, add first and last digit in it, then sum them together.
+fn part_1(input: &str) -> String {
     input
         .lines()
         .map(|line| {
@@ -11,8 +16,8 @@ pub(crate) fn part_1(input: &str) -> String {
         .to_string()
 }
 
-// take each line, add first and last digit in it, then sum them together.
-pub(crate) fn part_2(input: &str) -> String {
+/// Take each line, add first and last digit in it, then sum them together.
+fn part_2(input: &str) -> String {
     input
         .lines()
         .map(|line| {
@@ -77,7 +82,7 @@ fn find_last_spelling(line: &str) -> Option<(usize, u32)> {
 
 #[cfg(test)]
 mod tests {
-    use crate::day_1::*;
+    use crate::day_01::*;
 
     #[test]
     fn part_1_works() {

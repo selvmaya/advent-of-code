@@ -1,4 +1,6 @@
-pub(crate) use {part_1::part_1, part_2::part_2};
+use crate::SolverFn;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1::part_1, part_2::part_2];
 
 #[cfg(test)]
 const TEST_INPUT: &str = r"32T3K 765
@@ -145,7 +147,7 @@ mod part_1 {
 
     type Number = u64;
 
-    pub(crate) fn part_1(input: &str) -> String {
+    pub(super) fn part_1(input: &str) -> String {
         input
             .lines()
             .map(|line| {
@@ -227,7 +229,11 @@ QQQJA 1";
             #[test]
             #[ignore]
             fn not_previously_encountered() {
-                let output = part_1(std::fs::read_to_string("input/day_7.txt").unwrap().as_str());
+                let output = part_1(
+                    std::fs::read_to_string("../input/day_07.txt")
+                        .unwrap()
+                        .as_str(),
+                );
                 assert_ne!(output, "250400505");
                 assert_ne!(output, "33518063");
             }
@@ -382,7 +388,7 @@ mod part_2 {
 
     type Number = u64;
 
-    pub(crate) fn part_2(input: &str) -> String {
+    pub(super) fn part_2(input: &str) -> String {
         input
             .lines()
             .map(|line| {

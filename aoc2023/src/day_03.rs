@@ -1,10 +1,13 @@
+use crate::SolverFn;
 use itertools::Itertools;
 use regex::Regex;
 use std::cmp::max;
 use std::collections::{BTreeMap, HashSet};
 use std::ops::{Add, RangeInclusive};
 
-pub(crate) fn part_1(input: &str) -> String {
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
+
+fn part_1(input: &str) -> String {
     #[derive(Debug, Clone)]
     struct Number {
         value: u32,
@@ -81,7 +84,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .to_string()
 }
 
-pub(crate) fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> String {
     #[derive(Debug, Clone)]
     struct Number {
         value: u32,
@@ -164,7 +167,7 @@ pub(crate) fn part_2(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::day_3::*;
+    use crate::day_03::*;
     use std::collections::btree_map::Entry;
     use std::collections::HashMap;
     use std::fs;

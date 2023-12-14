@@ -1,3 +1,4 @@
+use crate::SolverFn;
 use itertools::Itertools;
 use std::cell::Cell;
 use std::collections::hash_map::Values;
@@ -7,7 +8,9 @@ use std::ops::Range;
 use std::str::FromStr;
 use strum::EnumString;
 
-pub(crate) fn part_1(input: &str) -> String {
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
+
+fn part_1(input: &str) -> String {
     struct Data {
         type_name: String,
         num: usize,
@@ -30,7 +33,6 @@ pub(crate) fn part_1(input: &str) -> String {
     }
     let mut maps: HashMap<String, (String, Vec<RangeMapping<_>>)> = HashMap::new();
     while let Some(label) = lines.get_mut().next() {
-        dbg!(label);
         let (source_type_name, rest) = label.split_once("-to-").unwrap();
         let (dest_type_name, _map_label) = rest.split_once(' ').unwrap();
         let previous_value = maps.insert(source_type_name.to_string(), {
@@ -58,7 +60,6 @@ pub(crate) fn part_1(input: &str) -> String {
         .into_iter()
         .map(|mut data| {
             while let Some((dest_type_name, range_mappings)) = maps.get(&data.type_name) {
-                dbg!(dest_type_name);
                 data.type_name = dest_type_name.clone();
                 data.num = if let Some(mapping) = range_mappings
                     .iter()
@@ -80,7 +81,7 @@ pub(crate) fn part_1(input: &str) -> String {
 /// Note:
 /// For the real input, this takes time in the magnitude of a minute/minutes to run,
 /// even on decently fast hardware with release optimizations.
-pub(crate) fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> String {
     #[derive(Debug, Clone, PartialOrd, PartialEq, Ord, Eq, EnumString)]
     enum DataVariant {
         #[strum(ascii_case_insensitive)]

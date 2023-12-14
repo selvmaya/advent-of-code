@@ -1,4 +1,6 @@
-pub(crate) use {part_1::part_1, part_2::part_2};
+use crate::SolverFn;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1::part_1, part_2::part_2];
 
 #[cfg(test)]
 const TEST_INPUT: &str = r"0 3 6 9 12 15
@@ -24,7 +26,7 @@ mod part_1 {
     ///   0 0
     /// Here, 9 is the future value we are looking for.
     /// Sum up the predicted/future value for each history (line of input lines).
-    pub(crate) fn part_1(input: &str) -> String {
+    pub(super) fn part_1(input: &str) -> String {
         input
             .lines()
             .map(|line| {
@@ -70,7 +72,7 @@ mod part_2 {
     type Number = i64;
 
     /// Just like part 1, but instead of adding a zero to the end we at it at the front.
-    pub(crate) fn part_2(input: &str) -> String {
+    pub(super) fn part_2(input: &str) -> String {
         input
             .lines()
             .map(|line| {

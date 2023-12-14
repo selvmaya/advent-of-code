@@ -1,4 +1,6 @@
-pub(crate) use {part_1::part_1, part_2::part_2};
+use crate::SolverFn;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1::part_1, part_2::part_2];
 
 mod part_1 {
     use super::*;
@@ -59,7 +61,7 @@ mod part_1 {
     /// Steps are defined as node jumps in the graph defined by input.
     /// We do not need to worry about infinite graph cycle,
     /// as the input should be guaranteed against a truly infinite loop.
-    pub(crate) fn part_1(input: &str) -> String {
+    pub(super) fn part_1(input: &str) -> String {
         let source_id = ID(Arc::new(['A', 'A', 'A']));
         let target_id = ID(Arc::new(['Z', 'Z', 'Z']));
 
@@ -198,7 +200,7 @@ mod part_2 {
     /// instead of hashing/pointer stepping.
     /// Each traversal (id of ids) can be compared with the others
     /// to find a time when they end up on the winning spot at a winning spot at the same time
-    pub(crate) fn part_2(input: &str) -> String {
+    pub(super) fn part_2(input: &str) -> String {
         let mut lines = input.lines();
         let instructions = lines
             .next()
@@ -276,7 +278,7 @@ mod part_2 {
                 break;
             }
         }
-        todo!()
+        unimplemented!()
     }
 
     #[cfg(test)]

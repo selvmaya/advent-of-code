@@ -1,6 +1,6 @@
-pub(crate) use {part_1::part_1, part_2::part_2};
+use crate::SolverFn;
 
-// #[cfg(test)]
+pub(crate) const PARTS: &[SolverFn] = &[part_1::part_1, part_2::part_2];
 
 mod part_1 {
     use itertools::Itertools;
@@ -11,7 +11,7 @@ mod part_1 {
     /// Parse as you go?
     /// Collect 2D grid of chars,
     /// Find starting point and go through pipes (cardinally connected) in each direction.
-    pub(crate) fn part_1(input: &str) -> String {
+    pub(super) fn part_1(input: &str) -> String {
         let lines = input.lines();
         let width = lines
             .clone()
@@ -152,8 +152,8 @@ LJ...";
 }
 
 mod part_2 {
-    pub(crate) fn part_2(input: &str) -> String {
-        todo!()
+    pub(super) fn part_2(input: &str) -> String {
+        unimplemented!()
     }
 
     #[cfg(test)]

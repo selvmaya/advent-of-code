@@ -1,11 +1,14 @@
+use crate::SolverFn;
 use itertools::Itertools;
+
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
 
 type Number = u64;
 
 const STARTING_SPEED: Number = 0; // speed is in mm
 const ACCEL_PER_MS: Number = 1; // accel is defined as mm per ms
 
-pub(crate) fn part_1(input: &str) -> String {
+fn part_1(input: &str) -> String {
     // parse
     let (time_limits, record_distances) = input
         .lines()
@@ -29,7 +32,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .to_string()
 }
 
-pub(crate) fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> String {
     // parse
     let (time_limit, record_distance) = input
         .lines()

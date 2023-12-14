@@ -1,6 +1,9 @@
+use crate::SolverFn;
 use itertools::Itertools;
 
-pub(crate) fn part_1(input: &str) -> String {
+pub(crate) const PARTS: &[SolverFn] = &[part_1, part_2];
+
+fn part_1(input: &str) -> String {
     input
         .lines()
         .map(|line| {
@@ -30,7 +33,7 @@ pub(crate) fn part_1(input: &str) -> String {
         .to_string()
 }
 
-pub(crate) fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> String {
     struct ScratchCardInfo {
         _label: usize,
         winning: Vec<u32>,
