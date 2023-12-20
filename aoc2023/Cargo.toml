@@ -5,6 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "macros"
+proc-macro = true
+
 [profile.dev.package."*"]
 opt-level = 3
 
@@ -14,3 +18,4 @@ seq-macro = "0.3"
 thiserror = "1.0"
 regex = "1.10"
 strum = { version = "0.25", features = ["derive", "strum_macros"] }
+syn = "2.0"
