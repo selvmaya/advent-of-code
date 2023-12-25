@@ -9,6 +9,7 @@ nom = "7.1"
 itertools = "0.12"
 seq-macro = "0.3"
 thiserror = "1.0"
+anyhow = "1.0"
 regex = "1.10"
 strum = { version = "0.25", features = ["derive", "strum_macros"] }
 syn = "2.0"
@@ -31,6 +32,7 @@ nom = { workspace = true }
 itertools = { workspace = true }
 seq-macro = { workspace = true }
 thiserror = { workspace = true }
+anyhow = { workspace = true }
 regex = { workspace = true }
 strum = { workspace = true }
 syn = { workspace = true }

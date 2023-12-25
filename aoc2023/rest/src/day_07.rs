@@ -226,7 +226,7 @@ QQQJA 1";
 			#[ignore]
 			fn not_previously_encountered() {
 				let output = part_1(
-					std::fs::read_to_string("../input/day_07.txt")
+					std::fs::read_to_string("../txt_input/day_07.txt")
 						.unwrap()
 						.as_str(),
 				);

@@ -2,6 +2,7 @@ use glue::SolverFn;
 use itertools::Itertools;
 use macros::*;
 
+use anyhow::Context;
 use std::io::{Error, ErrorKind};
 use std::{fs, io};
 
@@ -48,7 +49,7 @@ impl Solution {
 	fn run(&self, parts: &[SolverFn]) -> io::Result<()> {
 		if parts.is_empty() {
 			Err(Error::new(
-				ErrorKind::InvalidData,
+				ErrorKind::NotFound,
 				"Solution contained no solvers!",
 			))
 		} else {
@@ -60,9 +61,11 @@ impl Solution {
 	}
 }
 
-fn run_day(day: u8) -> io::Result<()> {
+fn run_day(day: u8) -> anyhow::Result<()> {
+	let path = format!("txt_input/day_{:0>2}.txt", day);
 	Solution {
-		input: fs::read_to_string(format!("input/day_{:0>2}.txt", day))?,
+		input: fs::read_to_string(&path).context(format!("could not read '{}'", path))?,
 	}
-	.run(map_to_part_functions!())
+	.run(map_to_part_functions!())?;
+	Ok(())
 }
