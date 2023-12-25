@@ -1,0 +1,1 @@
+pub type SolverFn = fn(&str) -> String;

@@ -1,9 +1,22 @@
+[workspace]
+resolver = "2"
+
+members = ["rest", "glue", "day_*"]
+
+[workspace.dependencies]
+glue = { path = "glue" }
+nom = "7.1"
+itertools = "0.12"
+seq-macro = "0.3"
+thiserror = "1.0"
+regex = "1.10"
+strum = { version = "0.25", features = ["derive", "strum_macros"] }
+syn = "2.0"
+
 [package]
 name = "aoc2023"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 name = "macros"
@@ -13,9 +26,13 @@ proc-macro = true
 opt-level = 3
 
 [dependencies]
-itertools = "0.12"
-seq-macro = "0.3"
-thiserror = "1.0"
-regex = "1.10"
-strum = { version = "0.25", features = ["derive", "strum_macros"] }
-syn = "2.0"
+glue = { workspace = true }
+nom = { workspace = true }
+itertools = { workspace = true }
+seq-macro = { workspace = true }
+thiserror = { workspace = true }
+regex = { workspace = true }
+strum = { workspace = true }
+syn = { workspace = true }
+rest = { path = "rest"}
+day_14 = { path = "day_14" }

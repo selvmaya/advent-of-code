@@ -4,8 +4,13 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/day_11/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/day_14/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glue/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/rest/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/src/day_11/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day_14/target" />
+      <excludeFolder url="file://$MODULE_DIR$/rest/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
