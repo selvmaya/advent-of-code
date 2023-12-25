@@ -1,7 +1,7 @@
 use glue::SolverFn;
 use itertools::Itertools;
 use macros::*;
-use std::fmt::Display;
+
 use std::io::{Error, ErrorKind};
 use std::{fs, io};
 
