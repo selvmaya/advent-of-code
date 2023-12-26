@@ -23,8 +23,17 @@ edition = "2021"
 name = "macros"
 proc-macro = true
 
+[profile.dev]
+opt-level = 1
+
 [profile.dev.package."*"]
 opt-level = 3
+
+[profile.dev.build-override]
+opt-level = 3
+
+[profile.dev.package.day_14]
+opt-level = 1
 
 [dependencies]
 glue = { workspace = true }

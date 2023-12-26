@@ -8,8 +8,7 @@ use std::{fs, io};
 
 use rest::*;
 
-use_independent_days!();
-// use_grouped_days!();
+use_all_days!();
 
 fn main() {
 	let mut days: Vec<u8> = Vec::new();
