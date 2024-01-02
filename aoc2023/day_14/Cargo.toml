@@ -11,10 +11,10 @@ doctest = false
 [dependencies]
 glue = { workspace = true }
 itertools = { workspace = true }
-seq-macro = { workspace = true }
-thiserror = { workspace = true }
+#seq-macro = { workspace = true }
+#thiserror = { workspace = true }
 anyhow = { workspace = true }
-nom = { workspace = true }
-regex = { workspace = true }
-strum = { workspace = true }
-syn = { workspace = true }
+#nom = { workspace = true }
+#regex = { workspace = true }
+#strum = { workspace = true }
+#syn = { workspace = true }
