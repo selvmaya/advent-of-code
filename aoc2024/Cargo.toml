@@ -3,6 +3,7 @@ members = [
     "util",
     "day1"
 ]
+default-members = ["util"]
 
 [package]
 name = "aoc2024"
