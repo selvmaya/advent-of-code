@@ -1,0 +1,22 @@
+[workspace]
+members = [
+    "util",
+    "day1"
+]
+
+[package]
+name = "aoc2024"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "day1"
+path = "day1"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[workspace.dependencies]
+util = { path = "util" }
+itertools = "0.13.0"
+winnow = "0.6.20"

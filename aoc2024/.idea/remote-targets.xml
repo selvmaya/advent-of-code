@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="WSL - kali-linux" type="wsl" uuid="01dc2121-b0e7-4b21-897b-5ab380662bdb">
+        <config>
+          <option name="distributionMsId" value="kali-linux" />
+          <option name="projectRootOnTarget" value="{exitCode=0, timeout=false, cancelled=false, stdout=/mnt/c/Users/mikke/AppData/Local/Programs/RustRover/jbr/bin&#10;, stderr=}/Default (Template) Project" />
+        </config>
+        <ContributedStateBase type="RsLanguageRuntime">
+          <config />
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
