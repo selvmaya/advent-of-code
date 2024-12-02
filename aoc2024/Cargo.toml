@@ -2,7 +2,7 @@
 members = [
     "util",
     "day1"
-]
+, "day2"]
 default-members = ["util"]
 
 [package]
