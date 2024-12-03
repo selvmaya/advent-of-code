@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub const SAMPLE: &str = {
-    "7 6 4 2 1
+	"7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5

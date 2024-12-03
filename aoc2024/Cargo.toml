@@ -1,8 +1,10 @@
 [workspace]
 members = [
     "util",
-    "day1"
-, "day2"]
+    "day1",
+    "day2",
+    "day3"
+]
 default-members = ["util"]
 
 [package]
@@ -10,9 +12,8 @@ name = "aoc2024"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "day1"
-path = "day1"
+[lib]
+path = "util"
 
 [profile.dev.package."*"]
 opt-level = 3
