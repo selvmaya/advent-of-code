@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 mod common;
 
+#[doc = include_str!("p2.md")]
 fn main() {
     util::DayInput::find::<2>().solve_with(solve);
 }
@@ -46,7 +47,7 @@ mod p2test {
     fn sample_solvable() {
         assert_eq!(super::solve(super::common::SAMPLE), 4);
     }
-    
+
     // note: here was a manual snapshot test. A better solution would be to use `insta` and cache
     // results somewhere hidden?
 }
