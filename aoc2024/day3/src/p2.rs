@@ -1,18 +1,17 @@
 mod common;
 
 fn main() {
-	let res = solve(util::day_input::<3>());
-	println!("Result: {}", res);
+    util::DayInput::find::<3>().solve_with(solve);
 }
 
 fn solve(input: impl AsRef<str>) -> u32 {
-	todo!()
+    todo!()
 }
 
 #[cfg(test)]
 mod p2test {
-	#[test]
-	fn sample_solves() {
-		assert_eq!(super::solve(super::common::SAMPLE), todo!());
-	}
+    #[test]
+    fn sample_solves() {
+        assert_eq!(super::solve(super::common::SAMPLE), todo!());
+    }
 }
