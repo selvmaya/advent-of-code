@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 mod common;
 
-#[doc = include_str!("p2.md")]
+#[doc = include_str!("../p2.md")]
 fn main() {
     util::DayInput::find::<2>().solve_with(solve);
 }
@@ -48,6 +48,11 @@ mod p2test {
         assert_eq!(super::solve(super::common::SAMPLE), 4);
     }
 
-    // note: here was a manual snapshot test. A better solution would be to use `insta` and cache
+    // here is a manual snapshot test. A better solution would be to use `insta` and cache
     // results somewhere hidden?
+    #[ignore]
+    #[test]
+    fn input_solvable() {
+        assert_eq!(super::solve(include_str!("../../inputs/2")), 674);
+    }
 }

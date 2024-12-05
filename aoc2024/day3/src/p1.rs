@@ -7,9 +7,7 @@ use winnow::{
     {PResult, Parser},
 };
 
-mod common;
-
-#[doc = include_str!("p1.rs")]
+#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<3>().solve_with(solve);
 }
@@ -36,9 +34,17 @@ fn parse_components(input: &mut &str) -> PResult<(u32, u32)> {
 }
 
 #[cfg(test)]
-mod p1test {
+pub mod p1test {
+    pub const SAMPLE: &str = include_str!("SAMPLE1");
+
     #[test]
     fn sample_solves() {
-        assert_eq!(super::solve(super::common::SAMPLE), 161);
+        assert_eq!(super::solve(SAMPLE), 161);
+    }
+
+    #[ignore]
+    #[test]
+    fn input_solvable() {
+        assert_eq!(super::solve(include_str!("../../inputs/3")), 179571322);
     }
 }

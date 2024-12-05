@@ -9,7 +9,7 @@ use winnow::{
     {PResult, Parser},
 };
 
-#[doc = include_str!("p1.md")]
+#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<2>().solve_with(solve);
 }
@@ -43,5 +43,10 @@ mod p1test {
     #[test]
     fn sample_solvable() {
         assert_eq!(super::solve(super::common::SAMPLE), 2);
+    }
+    #[ignore]
+    #[test]
+    fn input_solvable() {
+        assert_eq!(super::solve(include_str!("../../inputs/2")), 639);
     }
 }
