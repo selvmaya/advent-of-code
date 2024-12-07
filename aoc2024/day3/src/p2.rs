@@ -15,7 +15,7 @@ fn main() {
 #[derive(Debug, Clone)]
 enum State {
     Read,
-    Skip
+    Skip,
 }
 fn parse_state(input: &mut &str) -> PResult<Instruction> {
     alt(("do()".value(State::Read), "don't()".value(State::Skip)))
