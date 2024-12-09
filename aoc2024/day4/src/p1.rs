@@ -84,8 +84,8 @@ mod p1test {
 
     //    #[test]
     //    fn samples_are_different() {
-    //        pub const SAMPLE: &str = include_str!("SAMPLE");
-    //        assert_ne!(SAMPLE, SAMPLE);
+    //        pub const COMPLEX: &str = include_str!("COMPLEX");
+    //        assert_ne!(COMPLEX, COMPLEX);
     //    }
 
     #[test]

@@ -51,7 +51,6 @@ fn solve(input: impl AsRef<str>) -> u64 {
         .sum::<u64>()
 }
 
-
 #[derive(Hash, Copy, Clone, PartialEq, Eq)]
 pub struct PageNumber(pub u8);
 
