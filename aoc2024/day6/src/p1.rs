@@ -1,3 +1,5 @@
+#![doc = include_str!("../p1.md")]
+
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -11,7 +13,6 @@ use winnow::{
     {PResult, Parser},
 };
 
-#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<6>().solve_with(solve);
 }

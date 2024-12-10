@@ -1,3 +1,5 @@
+#![doc = include_str!("../p2.md")]
+
 #[cfg(test)]
 mod common;
 mod parse;
@@ -7,7 +9,6 @@ use std::collections::HashMap;
 #[allow(unused_imports)]
 use winnow::{ascii::*, combinator::*, error::*, prelude::*, token::*, Parser};
 
-#[doc = include_str!("../p2.md")]
 #[cfg_attr(test, allow(unused))]
 fn main() {
     util::DayInput::find::<1>().solve_with(solve);

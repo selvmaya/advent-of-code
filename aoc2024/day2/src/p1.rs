@@ -1,3 +1,5 @@
+#![doc = include_str!("../p1.md")]
+
 mod common;
 
 use itertools::Itertools;
@@ -9,7 +11,6 @@ use winnow::{
     {PResult, Parser},
 };
 
-#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<2>().solve_with(solve);
 }

@@ -1,10 +1,11 @@
+#![doc = include_str!("../p1.md")]
+
 #[allow(unused_imports)]
 use winnow::{ascii::*, combinator::*, error::*, prelude::*, token::*, Parser};
 
 mod common;
 mod parse;
 
-#[doc = include_str!("../p1.md")]
 #[cfg_attr(test, allow(unused))]
 fn main() {
     util::DayInput::find::<1>().solve_with(solve);

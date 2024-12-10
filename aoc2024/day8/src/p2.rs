@@ -1,3 +1,5 @@
+#![doc = include_str!("../p2.md")]
+
 mod common;
 
 use common::{Map, *};
@@ -14,7 +16,6 @@ use winnow::{
     {PResult, Parser},
 };
 
-#[doc = include_str!("../p2.md")]
 fn main() {
     util::DayInput::find::<8>().solve_with(solve);
 }

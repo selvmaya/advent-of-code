@@ -1,8 +1,9 @@
+#![doc = include_str!("../p2.md")]
+
 use itertools::Itertools;
 
 mod common;
 
-#[doc = include_str!("../p2.md")]
 fn main() {
     util::DayInput::find::<2>().solve_with(solve);
 }

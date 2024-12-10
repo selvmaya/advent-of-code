@@ -1,3 +1,5 @@
+#![doc = include_str!("../p1.md")]
+
 #[allow(unused_imports)]
 use winnow::{
     ascii::*,
@@ -7,7 +9,6 @@ use winnow::{
     {PResult, Parser},
 };
 
-#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<3>().solve_with(solve);
 }

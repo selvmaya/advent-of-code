@@ -1,3 +1,5 @@
+#![doc = include_str!("../p1.md")]
+
 mod common;
 
 use common::*;
@@ -7,7 +9,6 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use winnow::error::{ContextError, ErrMode};
 
-#[doc = include_str!("../p1.md")]
 fn main() {
     util::DayInput::find::<8>().solve_with(solve);
 }
