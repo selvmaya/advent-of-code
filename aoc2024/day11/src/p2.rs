@@ -2,7 +2,7 @@
 
 mod common;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 
 use common::*;
 #[allow(unused_imports)]
@@ -23,38 +23,83 @@ fn solve(input: impl AsRef<str>) -> u64 {
 	len_after_blinks::<75>(initial)
 }
 
+#[derive(Hash, Eq, PartialEq)]
+struct State {
+	stone:         Stone,
+	blinks_remain: u8
+}
 fn len_after_blinks<const N: u8>(stones: Stones) -> u64 {
-	fn count_after_steps(stone: Stone, blinks: u8, visited: &mut BTreeMap<Stone, u64>) -> u64 {
-		if blinks == 0 {
-			1 // there is one step at sub-step
-		} else if let Some(&prev_state) = visited.get(&stone) {
-			prev_state
-		} else {
-			let sub_blinks = blinks - 1;
-			match stone.0 {
-				// num is zero
-				0 => count_after_steps(Stone(1), sub_blinks, visited),
-				// if amount of digits in number is even
-				n if (n.ilog10() + 1) % 2 == 0 => {
-					let digit_len = n.ilog10() + 1;
-					let half_digit_len = digit_len / 2;
-					let cut_off: u64 = 10_u64.pow(half_digit_len);
-					let left_digits = n / cut_off;
-					let right_digits = n % cut_off;
-					count_after_steps(Stone(left_digits), sub_blinks, visited)
-						+ count_after_steps(Stone(right_digits), sub_blinks, visited)
+	fn compute_branch(stone: Stone, blinks: u8, visited: &mut HashMap<State, u64>) -> u64 {
+		match stone.0 {
+			0 => len_from_state(
+				State {
+					stone:         Stone(1),
+					blinks_remain: blinks
 				},
-				// all other numbers
-				n => count_after_steps(Stone(n * 2024), sub_blinks, visited)
-			}
+				visited
+			),
+			// if amount of digits in number is even
+			n if (n.ilog10() + 1) % 2 == 0 => {
+				let digit_len = n.ilog10() + 1;
+				let half_digit_len = digit_len / 2;
+				let cut_off: u64 = 10_u64.pow(half_digit_len);
+				let left_digits = n / cut_off;
+				let right_digits = n % cut_off;
+				len_from_state(
+					State {
+						stone:         Stone(left_digits),
+						blinks_remain: blinks
+					},
+					visited
+				) + len_from_state(
+					State {
+						stone:         Stone(right_digits),
+						blinks_remain: blinks
+					},
+					visited
+				)
+			},
+			// all other numbers
+			n => len_from_state(
+				State {
+					stone:         Stone(n * 2024),
+					blinks_remain: blinks
+				},
+				visited
+			)
+		}
+	}
+	fn len_from_state(state: State, visited: &mut HashMap<State, u64>) -> u64 {
+		if let Some(&prev) = visited.get(&state) {
+			// previously visited branch
+			prev
+		} else {
+			// unvisited state
+			let new_result = match state.blinks_remain {
+				// reached leaf for the first time
+				0 => 1,
+				// new branch
+				blinks => compute_branch(state.stone, blinks - 1, visited)
+			};
+			let prev = visited.insert(state, new_result);
+			assert_eq!(prev, None);
+			new_result
 		}
 	}
 
-	let mut visited: BTreeMap<Stone, u64> = BTreeMap::new();
+	let mut visited: HashMap<State, u64> = HashMap::new();
 	stones
 		.0
 		.into_iter()
-		.map(|stone| count_after_steps(stone, N, &mut visited))
+		.map(|stone| {
+			len_from_state(
+				State {
+					stone,
+					blinks_remain: N
+				},
+				&mut visited
+			)
+		})
 		.sum()
 }
 
@@ -72,6 +117,15 @@ mod tests {
 
 	#[test]
 	fn input_solvable() {
-		assert_eq!(super::solve(include_str!("../../inputs/11")), 0);
+		assert_ne!(
+			super::solve(include_str!("../../inputs/11")),
+			613318790,
+			"number is too low"
+		);
+		assert_eq!(
+			super::solve(include_str!("../../inputs/11")),
+			221683913164898,
+			"number is too low"
+		);
 	}
 }

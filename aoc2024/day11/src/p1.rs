@@ -49,16 +49,16 @@ fn after_n_blinks<const N: u8>(mut stones: Stones) -> Stones {
 pub fn after_blink(stones: Stones) -> Stones {
 	Stones(
 		stones
-				.0
+			.0
+			.into_iter()
+			.flat_map(|stone| {
+				match process(stone) {
+					(l, Some(r)) => vec![l, r],
+					(l, None) => vec![l]
+				}
 				.into_iter()
-				.flat_map(|stone| {
-					match process(stone) {
-						(l, Some(r)) => vec![l, r],
-						(l, None) => vec![l]
-					}
-							.into_iter()
-				})
-				.collect()
+			})
+			.collect()
 	)
 }
 
@@ -115,5 +115,3 @@ mod tests {
 		assert_eq!(solve(include_str!("../../inputs/11")), 186996);
 	}
 }
-
-
