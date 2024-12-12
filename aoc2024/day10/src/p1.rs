@@ -12,6 +12,9 @@ use winnow::{
     {PResult, Parser},
 };
 
+mod common;
+use common::*;
+
 fn main() {
     util::DayInput::find::<10>().solve_with(solve);
 }
@@ -36,113 +39,46 @@ fn main() {
 /// are distinct), then iterate from every start trail and go every possible cardinal direction
 /// each step. The input isn't enormous, so this doesn't feel too infeasible.
 fn solve(input: impl AsRef<str>) -> u64 {
-    let map = parse_map.parse_next(&mut input.as_ref()).expect("parsable");
+    let map = common::parse_map
+        .parse_next(&mut input.as_ref())
+        .expect("parsable");
     debug_assert_eq!(
         input.as_ref().trim().lines().count() * map.width as usize,
         map.inner.len()
     );
-    map.trailhead_score_sum()
+    trailhead_score_sum(&map)
 }
 
-struct TopographicMap {
-    /// This should have a len of `width * height`.
-    inner: Vec<Location>,
-    width: u8, // The rectangle isn't that big.
-}
-impl TopographicMap {
-    fn trailhead_score_sum(&self) -> u64 {
-        self.inner
-            .iter()
-            .enumerate()
-            .filter_map(|(pos, loc)| loc.0.and_then(|height| (height == 0).then_some(pos)))
-            // all trailhead positions
-            .map(|pos| {
-                /// Finds the positions of every 9-height (top) position reachable,
-                /// that is reachable from 0-height (the trailhead itself).
-                /// The returned values are not ensured unique in of themselves.
-                fn tops_from_trailhead(
-                    map: &TopographicMap,
-                    pos: usize,
-                    height: u8,
-                ) -> Box<dyn Iterator<Item = usize> + '_> {
-                    if height == 9 {
-                        Box::new(std::iter::once(pos))
-                    } else {
-                        let one_higher = height + 1;
-                        let map_width = map.width as usize;
-                        Box::new(
-                            [
-                                pos.checked_sub(map_width), // up
-                                pos.checked_add(map_width), // down
-                                pos.checked_sub(1) // left
-                                        .filter(|new_pos| new_pos / map_width == pos / map_width),
-                                pos.checked_add(1) // right
-                                    .filter(|new_pos| new_pos / map_width == pos / map_width),
-                            ]
-                            .into_iter()
-                            .flatten()
-                            .filter(move |&potential_pos| {
-                                match map.inner.get(potential_pos) {
-                                    Some(Location(Some(potential_height))) => {
-                                        // search in 1-higher trail path direction
-                                        *potential_height == one_higher
-                                    }
-                                    _ => false,
-                                }
-                            })
+fn trailhead_score_sum(map: &TopographicMap) -> u64 {
+    map.trailheads()
+        // all trailhead positions
+        .map(|pos| {
+            /// Finds the positions of every 9-height (top) position reachable,
+            /// that is reachable from 0-height (the trailhead itself).
+            /// The returned values are not ensured unique in of themselves.
+            fn tops_from_trailhead(
+                map: &TopographicMap,
+                pos: usize,
+                height: u8,
+            ) -> Box<dyn Iterator<Item = usize> + '_> {
+                if height == 9 {
+                    Box::new(std::iter::once(pos))
+                } else {
+                    let one_higher = height + 1;
+                    let map_width = map.width as usize;
+                    Box::new(
+                        map.all_dir_iter(pos, one_higher, map_width)
                             .flat_map(move |valid_pos| {
                                 tops_from_trailhead(map, valid_pos, one_higher)
                             }),
-                        )
-                    }
+                    )
                 }
-                // find score of this trailhead
-                tops_from_trailhead(self, pos, 0).unique().count() as u64
-                // these are summed: trailheads may share tops
-            })
-            .sum::<u64>()
-    }
-}
-/// In the problem this is called the "position"
-struct Location(Option<u8>);
-fn parse_map(input: &mut &str) -> PResult<TopographicMap> {
-    separated(
-        1..,
-        parse_line
-            .context(StrContext::Label("line of digits"))
-            .verify(|line: &Vec<_>| !line.is_empty()),
-        line_ending,
-    )
-    .verify(|lines: &Vec<_>| {
-        lines
-            .iter()
-            .map(|line: &Vec<Location>| line.len())
-            .all_equal()
-    })
-    .map(|lines: Vec<Vec<_>>| {
-        let map_width = lines.first().unwrap().len() as u8;
-        let inner = lines.into_iter().flatten().collect();
-        TopographicMap {
-            inner,
-            width: map_width,
-        }
-    })
-    .parse_next(input)
-}
-fn parse_line(input: &mut &str) -> PResult<Vec<Location>> {
-    repeat(
-        1..,
-        parse_location.context(StrContext::Label("location height as digit")),
-    )
-    .parse_next(input)
-}
-fn parse_location(input: &mut &str) -> PResult<Location> {
-    fn parse_digit(input: &mut &str) -> PResult<u8> {
-        take(1u8).parse_to().parse_next(input)
-    }
-    alt((parse_digit.map(Some), '.'.value(None)))
-        .map(Location)
-        .parse_next(input)
+            }
+            // find score of this trailhead
+            tops_from_trailhead(map, pos, 0).unique().count() as u64
+            // these are summed: trailheads may share tops
+        })
+        .sum::<u64>()
 }
 
 #[cfg(test)]
