@@ -19,3 +19,4 @@ path = "src/p2.rs"
 util = { workspace = true }
 itertools = { workspace = true }
 winnow = { workspace = true }
+anyhow = {workspace = true }

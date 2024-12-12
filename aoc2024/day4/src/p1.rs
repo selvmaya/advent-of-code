@@ -6,15 +6,15 @@ use std::collections::hash_map::IntoValues;
 use itertools::Itertools;
 #[allow(unused_imports)]
 use winnow::{
-	ascii::*,
-	combinator::*,
-	error::*,
-	token::*,
-	{PResult, Parser}
+    ascii::*,
+    combinator::*,
+    error::*,
+    token::*,
+    {PResult, Parser},
 };
 
 fn main() {
-	util::DayInput::find::<4>().solve_with(solve);
+    util::DayInput::find::<4>().solve_with(solve);
 }
 
 /// # Constraints
@@ -36,77 +36,77 @@ fn main() {
 /// with a certain offset. ### Note:
 /// The sample is 10 characters wide.
 fn solve(input: impl AsRef<str>) -> u32 {
-	let lines = input.as_ref().lines();
-	let line_count = lines.clone().count();
+    let lines = input.as_ref().lines();
+    let line_count = lines.clone().count();
 
-	fn diagonal_iter<'s>(
-		lines: impl Iterator<Item = &'s str>,
-		compare_fn: impl Fn((usize, usize, char)) -> (usize, char)
-	) -> IntoValues<usize, Vec<char>> {
-		lines
-			.enumerate()
-			.flat_map(|(y, line)| line.chars().enumerate().map(move |(x, c)| (y, x, c)))
-			.map(compare_fn)
-			.into_group_map()
-			.into_values()
-	}
-	let diagonals_down_right = diagonal_iter(lines.clone(), |(y, x, c)| (x + line_count - y, c));
-	let diagonals_down_left =
-		diagonal_iter(lines.clone(), |(y, x, c): (usize, usize, char)| (x + y, c));
-	let verticals = lines
-		.clone()
-		.flat_map(|line| line.chars().enumerate())
-		.into_group_map()
-		.into_values();
+    fn diagonal_iter<'s>(
+        lines: impl Iterator<Item = &'s str>,
+        compare_fn: impl Fn((usize, usize, char)) -> (usize, char),
+    ) -> IntoValues<usize, Vec<char>> {
+        lines
+            .enumerate()
+            .flat_map(|(y, line)| line.chars().enumerate().map(move |(x, c)| (y, x, c)))
+            .map(compare_fn)
+            .into_group_map()
+            .into_values()
+    }
+    let diagonals_down_right = diagonal_iter(lines.clone(), |(y, x, c)| (x + line_count - y, c));
+    let diagonals_down_left =
+        diagonal_iter(lines.clone(), |(y, x, c): (usize, usize, char)| (x + y, c));
+    let verticals = lines
+        .clone()
+        .flat_map(|line| line.chars().enumerate())
+        .into_group_map()
+        .into_values();
 
-	let horizontals = lines.flat_map(|line| line.chars().map_windows(|&seq: &[char; 4]| seq));
+    let horizontals = lines.flat_map(|line| line.chars().map_windows(|&seq: &[char; 4]| seq));
 
-	// first 3 iterators are group mapped
-	diagonals_down_right
-		.chain(diagonals_down_left)
-		.chain(verticals)
-		.flat_map(|directional_line| {
-			// directions get a slice to compare with
-			directional_line
-				.into_iter()
-				.map_windows(|&seq: &[char; 4]| seq)
-		})
-		// horizontal direction (also has slices)
-		.chain(horizontals)
-		// if the four-long sequence is `XMAS` (or the reverse), it is counted.
-		.filter(|&seq| seq == ['X', 'M', 'A', 'S'] || seq == ['S', 'A', 'M', 'X'])
-		.count() as u32
+    // first 3 iterators are group mapped
+    diagonals_down_right
+        .chain(diagonals_down_left)
+        .chain(verticals)
+        .flat_map(|directional_line| {
+            // directions get a slice to compare with
+            directional_line
+                .into_iter()
+                .map_windows(|&seq: &[char; 4]| seq)
+        })
+        // horizontal direction (also has slices)
+        .chain(horizontals)
+        // if the four-long sequence is `XMAS` (or the reverse), it is counted.
+        .filter(|&seq| seq == ['X', 'M', 'A', 'S'] || seq == ['S', 'A', 'M', 'X'])
+        .count() as u32
 }
 
 #[cfg(test)]
 mod p1test {
-	const SAMPLE: &str = include_str!("SAMPLE");
-	const SAMPLE_FILTERED: &str = include_str!("SAMPLE_FILTERED1");
+    const SAMPLE: &str = include_str!("SAMPLE");
+    const SAMPLE_FILTERED: &str = include_str!("SAMPLE_FILTERED1");
 
-	//    #[test]
-	//    fn samples_are_different() {
-	//        pub const COMPLEX: &str = include_str!("COMPLEX");
-	//        assert_ne!(COMPLEX, COMPLEX);
-	//    }
+    //    #[test]
+    //    fn samples_are_different() {
+    //        pub const COMPLEX: &str = include_str!("COMPLEX");
+    //        assert_ne!(COMPLEX, COMPLEX);
+    //    }
 
-	#[test]
-	fn sample_solves() {
-		assert_eq!(super::solve(SAMPLE), 18);
-	}
+    #[test]
+    fn sample_solves() {
+        assert_eq!(super::solve(SAMPLE), 18);
+    }
 
-	#[test]
-	fn sample_filtered_solves() {
-		assert_eq!(super::solve(SAMPLE_FILTERED), 18);
-	}
+    #[test]
+    fn sample_filtered_solves() {
+        assert_eq!(super::solve(SAMPLE_FILTERED), 18);
+    }
 
-	#[test]
-	fn sample_filtered_is_same() {
-		assert_eq!(super::solve(SAMPLE), super::solve(SAMPLE_FILTERED));
-	}
+    #[test]
+    fn sample_filtered_is_same() {
+        assert_eq!(super::solve(SAMPLE), super::solve(SAMPLE_FILTERED));
+    }
 
-	//#[ignore]
-	#[test]
-	fn input_solvable() {
-		assert_eq!(super::solve(include_str!("../../inputs/4")), 2536);
-	}
+    //#[ignore]
+    #[test]
+    fn input_solvable() {
+        assert_eq!(super::solve(include_str!("../../inputs/4")), 2536);
+    }
 }

@@ -19,3 +19,4 @@ opt-level = 3
 util = { path = "util" }
 itertools = "0.13.0"
 winnow = "0.6.20"
+anyhow = "1.0.94"
