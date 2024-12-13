@@ -20,3 +20,4 @@ util = { workspace = true }
 itertools = { workspace = true }
 winnow = { workspace = true }
 anyhow = { workspace = true }
+colored = { workspace = true }

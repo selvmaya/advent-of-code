@@ -36,13 +36,17 @@ fn solve(input: impl AsRef<str>) -> u64 {
         .get_regions()
         .into_iter()
         .map(|region| {
+            eprintln!(
+                "Calculating value for region:\n{}\n",
+                region.relative_to(&garden)
+            );
             let area = region.positions.len() as u64;
             let perimeter = region
                 .positions
                 .iter()
                 .map(|pos| {
                     // amount of edges: `max` - `self-similar neighbors`
-                    4 - garden
+                    let bordering_neighboors = garden
                         .bordering_pos(pos)
                         .filter(|bordering_pos| {
                             garden
@@ -50,16 +54,11 @@ fn solve(input: impl AsRef<str>) -> u64 {
                                 .get(bordering_pos.0)
                                 .is_some_and(|&flower| flower == region.flower)
                         })
-                        .count()
+                        .count();
+                    eprintln!("Position {} has {} neighboors.", pos, bordering_neighboors);
+                    4 - bordering_neighboors
                 })
                 .sum::<usize>() as u64;
-            eprintln!(
-                "Region of {} has an area of {} and a perimeter of {}:\n{}",
-                region.flower,
-                area,
-                perimeter,
-                region.relative_to(&garden)
-            );
             area * perimeter
         })
         .sum()
@@ -71,12 +70,10 @@ mod tests {
     fn example_square() {
         assert_eq!(super::solve(include_str!("SQUARE")), 4 * 8);
     }
-    #[ignore]
     #[test]
     fn example_1() {
         assert_eq!(super::solve(include_str!("EXAMPLE")), 140);
     }
-    #[ignore]
     #[test]
     fn example_2() {
         assert_eq!(super::solve(include_str!("EXAMPLE_2")), 772);

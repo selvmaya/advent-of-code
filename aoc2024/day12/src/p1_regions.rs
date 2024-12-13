@@ -17,6 +17,7 @@ impl Region {
             garden,
         }
     }
+    #[allow(unused)]
     pub fn changing_to<'a>(&'a self, other: &'a Self, garden: &'a Garden) -> RegionChange<'a> {
         RegionChange {
             a: self,
@@ -101,8 +102,7 @@ impl<'a> Display for RegionChange<'a> {
             .expect("non-empty")
             .max(b.y_span().try_len().expect("non_empty"));
         let middle_draw_y = max_draw_y / 2;
-        for draw_y in 0..max_draw_y
-        {
+        for draw_y in 0..max_draw_y {
             let try_draw = |f: &mut Formatter, r: &RelativeRegion| {
                 let x_start = (r.y_span().start() + draw_y) * self.garden.width;
                 // draws one region's part of a line
@@ -163,7 +163,6 @@ mod tests {
             }
         }
     }
-    #[ignore]
     #[test]
     fn regions_are_distinct_flowers() {
         let garden = include_str!("EXAMPLE").parse::<Garden>().unwrap();
@@ -183,7 +182,6 @@ mod tests {
             );
         }
     }
-    #[ignore]
     #[test]
     fn spans_function_correctly() {
         let garden = include_str!("EXAMPLE").parse::<Garden>().unwrap();
@@ -195,9 +193,9 @@ mod tests {
 
         let tests = [
             (Flower('A'), 0..=3, 0..=0),
-            (Flower('B'), 1..=2, 0..=1),
+            (Flower('B'), 0..=1, 1..=2),
             (Flower('C'), 2..=3, 1..=3),
-            (Flower('D'), 1..=1, 3..=3),
+            (Flower('D'), 3..=3, 1..=1),
             (Flower('E'), 0..=2, 3..=3),
         ];
         for (flower, x_span, y_span) in tests {

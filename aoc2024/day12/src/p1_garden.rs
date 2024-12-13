@@ -1,9 +1,9 @@
 use crate::p1_regions::Region;
+use colored::{Color, Colorize};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-
 #[allow(unused_imports)]
 use winnow::{
     ascii::*,
@@ -23,6 +23,7 @@ impl Display for Position {
     }
 }
 impl Position {
+    #[allow(unused)]
     fn relative_to<'a>(&'a self, garden: &'a Garden) -> RelativePosition<'a> {
         RelativePosition { pos: self, garden }
     }
@@ -59,6 +60,12 @@ pub struct Garden {
     pub width: usize,
 }
 
+impl Garden {
+    pub fn height(&self) -> usize {
+        self.inner.len() / self.width
+    }
+}
+
 impl Display for Garden {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // we want to print on multiple lines, except for on the last line
@@ -71,7 +78,6 @@ impl Display for Garden {
         write!(f, "{}", together(last_line))
     }
 }
-
 impl Garden {
     pub fn get_regions(&self) -> Vec<Region> {
         /// Recursive exploration of garden map.
@@ -83,79 +89,85 @@ impl Garden {
         /// This is stored, such that every one of these is unique.
         /// A vector is used because no key can be used to uniquely identify these,
         /// except an arbitrary position value.
-        fn explore(
-            garden: &Garden,
-            this_pos: Position,
-            visited: &mut HashSet<Position>,
-        ) -> (Region, Vec<Region>) {
-            let this_flower = *garden
-                .inner
-                .get(this_pos.0)
-                .expect("only call this function with a valid position");
-            //            eprintln!(
-            //                "Looking through {} at position {}",
-            //                this_flower,
-            //                this_pos.relative_to(garden)
-            //            );
-
-            let (bordering_regions, others): (Vec<Region>, Vec<Vec<Region>>) = garden
-                .bordering_pos(&this_pos)
-                .filter(|new_pos| garden.has_pos(new_pos))
-                .filter_map(|valid_pos| {
-                    if visited.insert(valid_pos) {
-                        // new position, explore branch
-                        Some(explore(garden, valid_pos, visited))
-                    } else {
-                        // positions was already seen
-                        None
-                    }
-                })
-                .unzip();
-
-            bordering_regions.into_iter().fold(
-                (
-                    Region {
-                        flower: this_flower,
-                        positions: HashSet::from([this_pos]),
-                    },
-                    others.into_iter().flatten().collect::<Vec<_>>(),
-                ),
-                |(mut self_similar, mut others), bordering_region| {
-                    if bordering_region.flower == self_similar.flower {
-                        eprintln!(
-                            "Connecting {} of {} flowers at {} to {}.",
-                            bordering_region.positions.len(),
-                            bordering_region.flower,
-                            bordering_region
-                                .positions
-                                .iter()
-                                .map(|pos| pos.relative_to(garden))
-                                .join(", "),
-                            this_pos.relative_to(garden)
-                        );
-                        let prev = self_similar.clone();
-                        self_similar.positions.extend(bordering_region.positions);
-                        eprintln!("{}", prev.changing_to(&self_similar, garden));
-                    } else {
-                        others.push(bordering_region);
-                    }
-
-                    (self_similar, others)
+    fn explore(
+        garden: &Garden,
+        this_pos: Position,
+        visited: &mut HashSet<Position>,
+    ) -> (Region, Vec<Region>) {
+        eprintln!(
+            "All visited:\n{}\n",
+            garden.as_highlighted(
+                &Region {
+                    flower: Flower('X'),
+                    positions: visited.clone()
                 },
+                Color::Blue
             )
-        }
-        
-        let (first, mut rest) = explore(self, Position(0), &mut HashSet::from([Position(0)]));
-        eprintln!("{}", first.relative_to(self));
-        rest.push(first);
-        rest
+        );
+        let this_flower = *garden
+            .inner
+            .get(this_pos.0)
+            .expect("only call this function with a valid position");
+
+        let (bordering_regions, others): (Vec<Region>, Vec<Vec<Region>>) = garden
+            .bordering_pos(&this_pos)
+            .filter(|new_pos| garden.has_pos(new_pos))
+            .sorted_by_key(|valid_pos| {
+                // sorting by boolean in this way makes self-similar branches go first
+                garden
+                    .inner
+                    .get(valid_pos.0)
+                    .is_some_and(|&flower| flower != this_flower)
+            })
+            .filter_map(|valid_pos| {
+                if visited.insert(valid_pos) {
+                    // new position, explore branch
+                    Some(explore(garden, valid_pos, visited))
+                } else {
+                    // position was already seen
+                    None
+                }
+            })
+            .unzip();
+
+        bordering_regions.into_iter().fold(
+            (
+                Region {
+                    flower: this_flower,
+                    positions: HashSet::from([this_pos]),
+                },
+                others.into_iter().flatten().collect::<Vec<_>>(),
+            ),
+            |(mut self_similar, mut others), bordering_region| {
+                if bordering_region.flower == self_similar.flower {
+                    self_similar.positions.extend(bordering_region.positions);
+                } else {
+                    others.push(bordering_region);
+                }
+
+                (self_similar, others)
+            },
+        )
     }
+
+    let (first, mut rest) = explore(self, Position(0), &mut HashSet::from([Position(0)]));
+    rest.push(first);
+    rest
+}
     pub fn bordering_pos(&self, this_pos: &Position) -> impl Iterator<Item = Position> {
         [
             // left
-            this_pos.0.checked_sub(1),
+            this_pos
+                .0
+                .checked_sub(1)
+                // remove wrap-around
+                .filter(|new_pos| new_pos / self.width == this_pos.0 / self.width),
             // right
-            this_pos.0.checked_add(1),
+            this_pos
+                .0
+                .checked_add(1)
+                // remove wrap-around
+                .filter(|new_pos| new_pos / self.width == this_pos.0 / self.width),
             // up
             this_pos.0.checked_sub(self.width),
             // down
@@ -168,12 +180,52 @@ impl Garden {
     pub fn has_pos(&self, pos: &Position) -> bool {
         self.inner.len() > pos.0
     }
+    #[allow(unused)]
+    pub fn as_highlighted<'a>(&'a self, region: &'a Region, color: Color) -> RegionHighlight<'a> {
+        RegionHighlight {
+            garden: self,
+            region,
+            color,
+        }
+    }
 }
 impl FromStr for Garden {
     type Err = ErrMode<ContextError>;
 
     fn from_str(mut s: &str) -> Result<Self, Self::Err> {
         parse_garden.parse_next(&mut s)
+    }
+}
+pub struct RegionHighlight<'a> {
+    garden: &'a Garden,
+    region: &'a Region,
+    color: Color,
+}
+#[allow(clippy::needless_lifetimes)]
+impl<'a> Display for RegionHighlight<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let draw_max_y = self.garden.height() - 1;
+        for (y, line) in self
+            .garden
+            .inner
+            .iter()
+            .enumerate()
+            .chunks(self.garden.width)
+            .into_iter()
+            .enumerate()
+        {
+            for (pos, flower) in line {
+                if self.region.positions.contains(&Position(pos)) {
+                    write!(f, "{}", flower.to_string().color(self.color))?;
+                } else {
+                    write!(f, "{}", flower)?;
+                }
+            }
+            if y != draw_max_y {
+                writeln!(f)?;
+            }
+        }
+        Ok(())
     }
 }
 
