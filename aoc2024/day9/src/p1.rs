@@ -6,7 +6,7 @@ use itertools::{EitherOrBoth, Itertools};
 use winnow::Parser;
 
 fn main() {
-    util::DayInput::find::<9>().solve_with(solve);
+	util::DayInput::find::<9>().solve_with(solve);
 }
 
 /// # Input
@@ -50,8 +50,8 @@ fn main() {
 /// free space as long as both know their original position, so that "swapping"
 /// (or calculating as-if) has the right effect in the result.
 fn solve(input: impl AsRef<str>) -> u64 {
-    let disk_map = input.as_ref().parse::<DiskMap>().expect("parsable");
-    let (files, file_spaces, _) = disk_map
+	let disk_map = input.as_ref().parse::<DiskMap>().expect("parsable");
+	let (files, file_spaces, _) = disk_map
 		.0
 		.into_iter()
 		// enumerating here gives us file (block) IDs
@@ -85,38 +85,38 @@ fn solve(input: impl AsRef<str>) -> u64 {
 			}
 		);
 
-    // both vectors semantically go from left to right until file iterator is
-    // reversed
-    file_spaces
-        .into_iter()
-        .zip_longest(files.into_iter().rev())
-        .map_while(|a| match a {
-            // file as well as a free space to the left of it
-            EitherOrBoth::Both(leftmost_free_space, rightmost_file)
-                if leftmost_free_space.pos.0 < rightmost_file.pos.0 =>
-            {
-                Some((leftmost_free_space.pos.0 * rightmost_file.id.0) as u64)
-            }
-            // file but no more free spaces further left of it
-            EitherOrBoth::Right(rightmost_file) | EitherOrBoth::Both(_, rightmost_file) => {
-                Some((rightmost_file.pos.0 * rightmost_file.id.0) as u64)
-            }
-            // free space but no more files to move [ends]
-            EitherOrBoth::Left(_leftmost_free_space) => None,
-        })
-        .sum()
+	// both vectors semantically go from left to right until file iterator is
+	// reversed
+	file_spaces
+		.into_iter()
+		.zip_longest(files.into_iter().rev())
+		.map_while(|a| match a {
+			// file as well as a free space to the left of it
+			EitherOrBoth::Both(leftmost_free_space, rightmost_file)
+				if leftmost_free_space.pos.0 < rightmost_file.pos.0 =>
+			{
+				Some((leftmost_free_space.pos.0 * rightmost_file.id.0) as u64)
+			},
+			// file but no more free spaces further left of it
+			EitherOrBoth::Right(rightmost_file) | EitherOrBoth::Both(_, rightmost_file) => {
+				Some((rightmost_file.pos.0 * rightmost_file.id.0) as u64)
+			},
+			// free space but no more files to move [ends]
+			EitherOrBoth::Left(_leftmost_free_space) => None
+		})
+		.sum()
 }
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn example_solvable() {
-        assert_eq!(super::solve(include_str!("EXAMPLE")), 1928);
-    }
+	#[test]
+	fn example_solvable() {
+		assert_eq!(super::solve(include_str!("EXAMPLE")), 1928);
+	}
 
-    //    #[ignore]
-    #[test]
-    fn input_solvable() {
-        assert_eq!(super::solve(include_str!("../../inputs/9")), 0);
-    }
+	//    #[ignore]
+	#[test]
+	fn input_solvable() {
+		assert_eq!(super::solve(include_str!("../../inputs/9")), 0);
+	}
 }

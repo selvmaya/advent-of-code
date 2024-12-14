@@ -12,7 +12,7 @@ use winnow::{
 };
 
 fn main() {
-	util::DayInput::find::<12>().solve_with(solve);
+	util::DayInput::find::<13>().solve_with(solve);
 }
 
 fn solve(input: impl AsRef<str>) -> u64 {
@@ -30,6 +30,6 @@ mod tests {
 	#[ignore]
 	#[test]
 	fn input_solvable() {
-		assert_eq!(super::solve(include_str!("../../inputs/10")), 607);
+		assert_eq!(super::solve(include_str!("../../inputs/13")), todo!());
 	}
 }

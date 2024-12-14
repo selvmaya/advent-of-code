@@ -2,15 +2,15 @@
 
 #[allow(unused_imports)]
 use winnow::{
-    ascii::*,
-    combinator::*,
-    error::*,
-    token::*,
-    {PResult, Parser},
+	ascii::*,
+	combinator::*,
+	error::*,
+	token::*,
+	{PResult, Parser}
 };
 
 fn main() {
-    util::DayInput::find::<6>().solve_with(solve);
+	util::DayInput::find::<6>().solve_with(solve);
 }
 
 /// # Problem
@@ -29,13 +29,13 @@ fn main() {
 /// step check if the different path created by an obstacle creates an infinite
 /// loop or not, using the above method.
 fn solve(input: impl AsRef<str>) -> u64 {
-    todo!()
+	todo!()
 }
 #[cfg(test)]
 mod tests {
 
-    #[test]
-    fn input_solvable() {
-        assert_eq!(super::solve(include_str!("../../inputs/6")), 0);
-    }
+	#[test]
+	fn input_solvable() {
+		assert_eq!(super::solve(include_str!("../../inputs/6")), 0);
+	}
 }

@@ -2,15 +2,15 @@
 use itertools::Itertools;
 #[allow(unused_imports)]
 use winnow::{
-    ascii::*,
-    combinator::*,
-    error::*,
-    token::*,
-    {PResult, Parser},
+	ascii::*,
+	combinator::*,
+	error::*,
+	token::*,
+	{PResult, Parser}
 };
 
 fn main() {
-    util::DayInput::find::<5>().solve_with(solve);
+	util::DayInput::find::<5>().solve_with(solve);
 }
 
 /// # Specification
@@ -46,25 +46,25 @@ fn main() {
 /// values. This means there are multiple valid sorting configurations for a set
 /// of updates.
 fn solve(input: impl AsRef<str>) -> u32 {
-    let (x_smaller_than_y, updates) = parse.parse_next(&mut input.as_ref()).expect("parsable");
-    let rule_map = x_smaller_than_y.into_iter().into_group_map();
-    updates
-        .into_iter()
-        .filter_map(|update| {
-            update.into_iter().try_fold(Vec::new(), |mut prev, next| {
-                if rule_map
-                    .get(&next)
-                    .is_some_and(|my_ys| my_ys.iter().any(|y| prev.contains(y)))
-                {
-                    None
-                } else {
-                    prev.push(next);
-                    Some(prev)
-                }
-            })
-        })
-        .map(|update| update[update.len() / 2].0 as u32)
-        .sum()
+	let (x_smaller_than_y, updates) = parse.parse_next(&mut input.as_ref()).expect("parsable");
+	let rule_map = x_smaller_than_y.into_iter().into_group_map();
+	updates
+		.into_iter()
+		.filter_map(|update| {
+			update.into_iter().try_fold(Vec::new(), |mut prev, next| {
+				if rule_map
+					.get(&next)
+					.is_some_and(|my_ys| my_ys.iter().any(|y| prev.contains(y)))
+				{
+					None
+				} else {
+					prev.push(next);
+					Some(prev)
+				}
+			})
+		})
+		.map(|update| update[update.len() / 2].0 as u32)
+		.sum()
 }
 
 #[derive(Hash, Copy, Clone, PartialEq, Eq)]
@@ -72,40 +72,40 @@ pub struct PageNumber(pub u8);
 
 #[allow(clippy::type_complexity)]
 pub fn parse(input: &mut &str) -> PResult<(Vec<(PageNumber, PageNumber)>, Vec<Vec<PageNumber>>)> {
-    separated_pair(parse_rules, multispace1, parse_updates).parse_next(input)
+	separated_pair(parse_rules, multispace1, parse_updates).parse_next(input)
 }
 
 fn parse_rules(input: &mut &str) -> PResult<Vec<(PageNumber, PageNumber)>> {
-    separated(
-        1..,
-        separated_pair(
-            dec_uint::<&str, u8, ContextError>.map(PageNumber),
-            "|",
-            dec_uint::<&str, u8, ContextError>.map(PageNumber),
-        ),
-        line_ending,
-    )
-    .parse_next(input)
+	separated(
+		1..,
+		separated_pair(
+			dec_uint::<&str, u8, ContextError>.map(PageNumber),
+			"|",
+			dec_uint::<&str, u8, ContextError>.map(PageNumber)
+		),
+		line_ending
+	)
+	.parse_next(input)
 }
 fn parse_updates(input: &mut &str) -> PResult<Vec<Vec<PageNumber>>> {
-    separated(1.., parse_update, line_ending).parse_next(input)
+	separated(1.., parse_update, line_ending).parse_next(input)
 }
 fn parse_update(input: &mut &str) -> PResult<Vec<PageNumber>> {
-    separated(1.., dec_uint.map(PageNumber), ",").parse_next(input)
+	separated(1.., dec_uint.map(PageNumber), ",").parse_next(input)
 }
 
 #[cfg(test)]
 mod p1test {
-    const SAMPLE: &str = include_str!("SAMPLE");
+	const SAMPLE: &str = include_str!("SAMPLE");
 
-    #[test]
-    fn sample_solves() {
-        assert_eq!(super::solve(SAMPLE), 143);
-    }
+	#[test]
+	fn sample_solves() {
+		assert_eq!(super::solve(SAMPLE), 143);
+	}
 
-    //#[ignore]
-    #[test]
-    fn input_solvable() {
-        assert_eq!(super::solve(include_str!("../../inputs/5")), 5091);
-    }
+	//#[ignore]
+	#[test]
+	fn input_solvable() {
+		assert_eq!(super::solve(include_str!("../../inputs/5")), 5091);
+	}
 }

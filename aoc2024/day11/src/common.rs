@@ -7,11 +7,11 @@ pub struct Stone(pub u64);
 pub struct Stones(pub Vec<Stone>);
 
 pub fn parse_stones(input: &mut &str) -> PResult<Stones> {
-    separated(1.., parse_stone, " ")
-        .parse_next(input)
-        .map(Stones)
+	separated(1.., parse_stone, " ")
+		.parse_next(input)
+		.map(Stones)
 }
 
 fn parse_stone(input: &mut &str) -> PResult<Stone> {
-    dec_uint.map(Stone).parse_next(input)
+	dec_uint.map(Stone).parse_next(input)
 }
