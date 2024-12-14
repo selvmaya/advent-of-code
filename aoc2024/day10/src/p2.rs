@@ -5,15 +5,15 @@ mod common;
 use common::*;
 #[allow(unused_imports)]
 use winnow::{
-	ascii::*,
-	combinator::*,
-	error::*,
-	token::*,
-	{PResult, Parser}
+    ascii::*,
+    combinator::*,
+    error::*,
+    token::*,
+    {PResult, Parser},
 };
 
 fn main() {
-	util::DayInput::find::<10>().solve_with(solve);
+    util::DayInput::find::<10>().solve_with(solve);
 }
 
 /// # Problem
@@ -30,42 +30,42 @@ fn main() {
 /// *not* as we go down. It remains true that branch depth is still capped to 9
 /// or 10.
 fn solve(input: impl AsRef<str>) -> u64 {
-	let map = parse_map.parse_next(&mut input.as_ref()).expect("parsable");
-	sum_of_distinct_hiking_trails(&map)
+    let map = parse_map.parse_next(&mut input.as_ref()).expect("parsable");
+    sum_of_distinct_hiking_trails(&map)
 }
 
 fn sum_of_distinct_hiking_trails(map: &TopographicMap) -> u64 {
-	map.trailheads()
-		.map(|pos| {
-			fn trails_from_height(map: &TopographicMap, pos: usize, height: u8) -> u64 {
-				if height == 9 {
-					1
-				} else {
-					let one_higher = height + 1;
-					let map_width = map.width as usize;
-					map.all_dir_iter(pos, one_higher, map_width)
-						.map(move |valid_pos| trails_from_height(map, valid_pos, one_higher))
-						.sum()
-				}
-			}
+    map.trailheads()
+        .map(|pos| {
+            fn trails_from_height(map: &TopographicMap, pos: usize, height: u8) -> u64 {
+                if height == 9 {
+                    1
+                } else {
+                    let one_higher = height + 1;
+                    let map_width = map.width as usize;
+                    map.all_dir_iter(pos, one_higher, map_width)
+                        .map(move |valid_pos| trails_from_height(map, valid_pos, one_higher))
+                        .sum()
+                }
+            }
 
-			trails_from_height(map, pos, 0)
-		})
-		.sum()
+            trails_from_height(map, pos, 0)
+        })
+        .sum()
 }
 
 #[cfg(test)]
 mod tests {
-	#[test]
-	fn trailhead_rating_sum_examples() {
-		assert_eq!(super::solve(include_str!("HIKING_TRAIL_3")), 3);
-		assert_eq!(super::solve(include_str!("HIKING_TRAIL_13")), 13);
-		assert_eq!(super::solve(include_str!("HIKING_TRAIL_227")), 227);
-		assert_eq!(super::solve(include_str!("EXAMPLE_LARGE")), 81);
-	}
+    #[test]
+    fn trailhead_rating_sum_examples() {
+        assert_eq!(super::solve(include_str!("HIKING_TRAIL_3")), 3);
+        assert_eq!(super::solve(include_str!("HIKING_TRAIL_13")), 13);
+        assert_eq!(super::solve(include_str!("HIKING_TRAIL_227")), 227);
+        assert_eq!(super::solve(include_str!("EXAMPLE_LARGE")), 81);
+    }
 
-	#[test]
-	fn input_solvable() {
-		assert_eq!(super::solve(include_str!("../../inputs/10")), 1384);
-	}
+    #[test]
+    fn input_solvable() {
+        assert_eq!(super::solve(include_str!("../../inputs/10")), 1384);
+    }
 }
