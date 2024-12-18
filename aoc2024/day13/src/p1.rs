@@ -112,14 +112,11 @@ impl Machine {
                     y: min.offset.y * count,
                 };
                 self.prize_pos.x.checked_sub(offset.x).is_some_and(|x| {
-                    self.prize_pos
-                        .y
-                        .checked_sub(offset.y)
-                        .is_some_and(|y| {
-                            let remaining = Vec2 { x, y };
-                            let divisible = remaining.divisible_by(max.offset);
-                            divisible
-                        })
+                    self.prize_pos.y.checked_sub(offset.y).is_some_and(|y| {
+                        let remaining = Vec2 { x, y };
+                        let divisible = remaining.divisible_by(max.offset);
+                        divisible
+                    })
                 })
             })
             .map(|min_count| {
