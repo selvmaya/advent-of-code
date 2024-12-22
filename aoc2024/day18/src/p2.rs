@@ -91,7 +91,7 @@ mod tests {
         assert_eq!(solve::<6>(include_str!("EXAMPLE")).to_string(), "6,1");
     }
 
-        #[ignore]
+    #[ignore]
     #[test]
     fn input_solvable() {
         assert_eq!(

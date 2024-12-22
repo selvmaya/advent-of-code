@@ -1,0 +1,23 @@
+[package]
+name = "day21"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "p1"
+path = "src/p1.rs"
+
+[[bin]]
+name = "p2"
+path = "src/p2.rs"
+
+[features]
+#test = ["winnow/debug"]
+#dev = ["winnow/debug"]
+
+[dependencies]
+util = { workspace = true }
+itertools = { workspace = true }
+winnow = { workspace = true }
+anyhow = { workspace = true }
+colored = { workspace = true }
