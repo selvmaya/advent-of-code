@@ -7,6 +7,11 @@
         <language minSize="55" name="Rust" />
       </Languages>
     </inspection_tool>
+    <inspection_tool class="RsExperimentalChecks" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="RsExperimentalTraitObligations" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="RsExperimentalUnresolvedMethod" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="RsExperimentalUnresolvedPath" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="RsInherentImplDifferentCrate" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="ScalaWeakerAccess" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
       <option name="processCode" value="true" />

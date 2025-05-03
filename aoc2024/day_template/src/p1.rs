@@ -12,7 +12,7 @@ use winnow::{
 };
 
 fn main() {
-	util::DayInput::find::<13>().solve_with(solve);
+	util::DayInput::find::<_>().solve_with(solve);
 }
 
 fn solve(input: impl AsRef<str>) -> u64 {
@@ -22,14 +22,13 @@ fn solve(input: impl AsRef<str>) -> u64 {
 #[cfg(test)]
 mod tests {
 	#[test]
-	fn trailhead_score_sum_examples() {
-		todo!();
+	fn example_solvable() {
 		assert_eq!(super::solve(include_str!("EXAMPLE")), todo!());
 	}
 
 	#[ignore]
 	#[test]
 	fn input_solvable() {
-		assert_eq!(super::solve(include_str!("../../inputs/13")), todo!());
+		assert_eq!(super::solve(include_str!("../../inputs/_")), todo!());
 	}
 }

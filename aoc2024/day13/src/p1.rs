@@ -1,7 +1,6 @@
 #![doc = include_str!("../p1.md")]
 
-use std::ops::{AddAssign, Sub};
-
+use itertools::Itertools;
 #[allow(unused_imports)]
 use winnow::{
     ascii::*,
@@ -45,11 +44,7 @@ fn parse_machine(input: &mut &str) -> PResult<Machine> {
         line_ending,
         parse_prize_pos,
     )
-    .map(|((a_offset, b_offset), prize_pos)| Machine {
-        a_offset,
-        b_offset,
-        prize_pos,
-    })
+    .map(|((a_offset, b_offset), prize_pos)| Machine::new(a_offset, b_offset, prize_pos))
     .parse_next(input)
 }
 fn parse_button_offset(input: &mut &str) -> PResult<Vec2> {
@@ -68,10 +63,74 @@ fn parse_prize_pos(input: &mut &str) -> PResult<Vec2> {
 
 #[derive(Debug, Clone)]
 struct Machine {
-    a_offset: Vec2,
-    b_offset: Vec2,
+    a: Button,
+    b: Button,
     prize_pos: Vec2,
 }
+
+impl Machine {
+    fn new(a_offset: Vec2, b_offset: Vec2, prize_pos: Vec2) -> Self {
+        Self {
+            a: Button {
+                offset: a_offset,
+                cost: 3,
+            },
+            b: Button {
+                offset: b_offset,
+                cost: 1,
+            },
+            prize_pos,
+        }
+    }
+    /// No need to figure out what the actual press sequence was. The token cost
+    /// is all we care about.
+    /// We want to use the "biggest" (magnitude) vector as much as possible,
+    /// but this might only be possible with certain offsets.
+    /// We simply use the only other vector until that is possible.
+    fn optimal_cost(&self) -> Option<TokenCount> {
+        // the optimal path is one that:
+        // 1) is possible/valid
+        // 2) uses the biggest of two vectors as much as possible
+        // we can search for some amount of small vector, and see if any amount of it can
+        // create us a path only completable by the big vector.
+        // if no combination of only the small vector can create a path for the small vector,
+        // the path is impossible.
+        // We cannot have negative values of either vector,
+        // and the case where that would be necessary can be assumed to not exist.
+        // The bigger vector is *always* the best vector if it can reach the target,
+        // while also being of the biggest magnitude. We just may also need the smaller vector.
+        // There are no reasons to try combinations of A and B, only xA and yB.
+        let (min, max) = [&self.a, &self.b]
+            .into_iter()
+            .sorted_by_key(|a| a.offset.magnitude() as u32)
+            .collect_tuple()
+            .unwrap();
+        (0..=100)
+            .find(|&count: &u64| {
+                let offset = Vec2 {
+                    x: min.offset.x * count,
+                    y: min.offset.y * count,
+                };
+                self.prize_pos.x.checked_sub(offset.x).is_some_and(|x| {
+                    self.prize_pos.y.checked_sub(offset.y).is_some_and(|y| {
+                        let remaining = Vec2 { x, y };
+                        let divisible = remaining.divisible_by(max.offset);
+                        divisible
+                    })
+                })
+            })
+            .map(|min_count| {
+                let max_count = (self.prize_pos.x - (max.offset.x * min_count)) / max.offset.x;
+                min_count * min.cost as u64 + max_count + max.cost as u64
+            })
+    }
+}
+#[derive(Debug, Clone)]
+struct Button {
+    offset: Vec2,
+    cost: TokenCost,
+}
+type TokenCost = u8;
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Vec2 {
     x: u64,
@@ -83,65 +142,17 @@ impl Vec2 {
     }
 
     fn divisible_by(&self, other: Vec2) -> bool {
-        other.x % self.x == 0 || other.y % self.y == 0
+        self.x % other.x == 0 && self.y % other.y == 0
     }
 }
 type TokenCount = u64;
 
-impl Sub for Vec2 {
-    type Output = Vec2;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vec2 {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-        }
-    }
-}
-
-impl AddAssign for Vec2 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-    }
-}
-
-impl Machine {
-    /// No need to figure out what the actual press sequence was. The token cost
-    /// is all we care about.
-    /// We want to use the "biggest" (magnitude) vector as much as possible,
-    /// but this might only be possible with certain offsets.
-    /// We simply use the only other vector until that is possible.
-    fn optimal_cost(&self) -> Option<TokenCount> {
-        // checks if the range of I can be made up for by J, but does not consider if it is
-        // possible with multiple combinations of I and J, just I + N J (?)
-        let x_possible = {
-            (self.prize_pos.x % self.a_offset.x) % self.b_offset.x == 0
-                || (self.prize_pos.x % self.b_offset.x) % self.a_offset.x == 0
-        };
-        // todo: handle cases where it is impossible to get a prize from a machine.
-        // there is a hint that it should never take >100 button presses in total to
-
-        if self.a_offset == self.b_offset {
-            // use `B` cost always, assume divisible
-            return Some(self.prize_pos.x / self.b_offset.x);
-        }
-        let ((small, small_cost), (big, big_cost)) =
-            if self.a_offset.magnitude() < self.b_offset.magnitude() {
-                ((self.a_offset, 3), (self.b_offset, 1))
-            } else {
-                ((self.b_offset, 1), (self.a_offset, 3))
-            };
-        let mut walk_pos = Vec2 { x: 0, y: 0 };
-        let mut cost = 0;
-        let remaining = self.prize_pos - walk_pos;
-        while !remaining.divisible_by(big) {
-            walk_pos += small;
-            cost += small_cost;
-        }
-        Some(cost + ((remaining.x / big.x) * big_cost))
-    }
-}
+//impl AddAssign for Vec2 {
+//    fn add_assign(&mut self, rhs: Self) {
+//        self.x += rhs.x;
+//        self.y += rhs.y;
+//    }
+//}
 
 #[cfg(test)]
 mod tests {

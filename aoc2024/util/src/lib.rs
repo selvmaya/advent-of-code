@@ -15,13 +15,13 @@ impl DayInput<String> {
             });
             std::path::absolute(&relative_path).expect("absolute path creation")
         };
-        eprintln!("Looking for {:?}...", absolute);
+        eprint!("Looking for {:?}... ", absolute);
         let x = std::fs::read_to_string(absolute).expect("file needs to exist");
-        eprintln!("Found file! Returning it to the program.\n");
+        eprintln!("Found file!\n");
         DayInput(x)
     }
 
-    // elided lifetimes gives problems where function is not general enough
+    // eliding lifetimes makes function "not general enough"
     #[allow(clippy::needless_lifetimes)]
     pub fn solve_with<'s, O: Display>(&'s self, solver: impl FnOnce(&'s Self) -> O) {
         let o = solver(self);
