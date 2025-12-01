@@ -9,4 +9,4 @@ members = ["d01"]
 [workspace.dependencies]
 itertools = "0.14.0"
 proptest = "1.9.0"
-
+winnow = "0.7.14"
