@@ -1,0 +1,12 @@
+[workspace]
+resolver = "3"
+members = ["d01"]
+
+# name = "aoc2025"
+# version = "0.1.0"
+# edition = "2024"
+
+[workspace.dependencies]
+itertools = "0.14.0"
+proptest = "1.9.0"
+
