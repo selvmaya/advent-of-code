@@ -4,3 +4,6 @@
 [submodule "aoc2024/inputs"]
 	path = aoc2024/inputs
 	url = https://github.com/selvmaya/aoc-2024-inputs
+[submodule "aoc2025/inputs"]
+	path = aoc2025/inputs
+	url = https://github.com/selvmaya/aoc-2025-inputs
