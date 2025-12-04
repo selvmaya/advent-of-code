@@ -1,0 +1,16 @@
+[package]
+name = "d02"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "p1"
+path = "src/p1.rs"
+
+[[bin]]
+name = "p2"
+path = "src/p2.rs"
+
+[dependencies]
+itertools = { workspace = true }
+winnow = { workspace = true }

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["d01"]
+members = ["d01", "d02"]
 
 # name = "aoc2025"
 # version = "0.1.0"
