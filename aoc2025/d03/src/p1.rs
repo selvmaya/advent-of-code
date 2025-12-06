@@ -1,14 +1,53 @@
-use winnow::{prelude::*, Result as WResult};
+mod shared;
+
+use shared::*;
+use winnow::{error::ContextError, prelude::*, Result as WResult};
 
 fn main() {
-    println!("Hello, world!");
+    let parsed: Puzzle = EXAMPLE_INPUT.parse().expect("able to parse");
+    let solution: Solution = parse.into();
+    println!("Solution: {:?}", solution);
 }
 
-struct Solution();
-struct Puzzle();
+#[derive(Debug, PartialEq, Eq)]
+struct Solution;
+impl From<Puzzle> for Puzzle {
+    fn from(puzzle: Puzzle) -> Self {
+        todo!("unimplemented solver")
+    }
+}
+#[derive(Debug)]
+struct Puzzle;
+impl FromStr for Puzzle {
+    fn from_str(s: &str) -> Self {
+        todo!("unimplemented parsing")
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use shared::{EXAMPLE_INPUT, REAL_INPUT};
+
+    const EXAMPLE_ANSWER: Solution = todo!("not given");
+
     #[test]
-    fn example_input_works() {}
+    fn example_input_works() {
+        let parsed: Puzzle = EXAMPLE_INPUT.parse().expect("able to parse");
+        let solution: Solution = parse.into();
+        assert_eq!(
+            solution, EXAMPLE_ANSWER,
+            "calculated should match expected answewr"
+        );
+    }
+
+    // #[ignore]
+    #[test]
+    fn real_input_works() {
+        let parsed: Puzzle = REAL_INPUT.parse().expect("able to parse");
+        let solution: Solution = parse.into();
+        panic!("GOT NEW ANSWER: {:?}", solution);
+        // const KNOWN_ANSWER: Solution = todo!("unknown");
+        // assert_eq!(solution, KNOWN_ANSWER, "we already know the expected answer");
+    }
 }
