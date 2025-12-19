@@ -1,11 +1,13 @@
 mod shared;
 
+use std::str::FromStr;
+
 use shared::*;
 use winnow::{error::ContextError, prelude::*, Result as WResult};
 
 fn main() {
     let parsed: Puzzle = EXAMPLE_INPUT.parse().expect("able to parse");
-    let solution: Solution = parse.into();
+    let solution: Solution = parsed.into();
     println!("Solution: {:?}", solution);
 }
 
@@ -19,7 +21,8 @@ impl From<Puzzle> for Puzzle {
 #[derive(Debug)]
 struct Puzzle;
 impl FromStr for Puzzle {
-    fn from_str(s: &str) -> Self {
+    type Err = todo!();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         todo!("unimplemented parsing")
     }
 }
